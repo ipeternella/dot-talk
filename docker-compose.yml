@@ -1,0 +1,33 @@
+version: "3.5"
+services:
+  db:
+    image: postgres:10.1-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: dottalk
+      POSTGRES_PASSWORD: dottalk
+      POSTGRES_DB: dottalk
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    env_file:
+      - .env
+    # TODO: fix bin/obj folders for volumes
+    # volumes:
+    #   - .:/app
+    ports:
+      - "${ASPNETCORE_SOCKET_BIND_PORT}:${ASPNETCORE_SOCKET_BIND_PORT}"
+    depends_on:
+      - db
+    command:
+      [
+        "./Scripts/wait-for-it.sh",
+        "db:5432",
+        "-t",
+        "120",
+        "--",
+        "./Scripts/start-from-compose.sh",
+      ]

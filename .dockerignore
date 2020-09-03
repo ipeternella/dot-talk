@@ -1,0 +1,12 @@
+# Starts by excluding everything
+*
+
+# Includes main folders
+!Dottalk
+!Tests
+!Scripts
+!Dottalk.sln
+
+# Excludes folders that might exist locally
+**/bin
+**/obj

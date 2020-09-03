@@ -1,0 +1,19 @@
+# Main variables required for the Docker layers
+ARG MAIN_PROJECT_NAME=Dottalk
+ARG DOTNETCORE_VERSION=3.1
+
+# Starting layer point using build image with dotnet SDK (very heavy image ~ 2GB)
+FROM mcr.microsoft.com/dotnet/core/sdk:$DOTNETCORE_VERSION AS build-env
+ARG MAIN_PROJECT_NAME
+ARG DOTNETCORE_VERSION
+
+WORKDIR /app
+
+# Restores (downloads) all NuGet packages from all projects of the solution on a separate layer
+COPY ./$MAIN_PROJECT_NAME/$MAIN_PROJECT_NAME.csproj ./$MAIN_PROJECT_NAME/
+COPY ./Tests/Tests.csproj ./Tests/
+RUN dotnet restore ./$MAIN_PROJECT_NAME/$MAIN_PROJECT_NAME.csproj
+RUN dotnet restore ./Tests/Tests.csproj
+
+# Copy all files
+COPY . ./
