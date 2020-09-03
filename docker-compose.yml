@@ -15,9 +15,6 @@ services:
       dockerfile: Dockerfile.local
     env_file:
       - .env
-    # TODO: fix bin/obj folders for volumes
-    # volumes:
-    #   - .:/app
     ports:
       - "${ASPNETCORE_SOCKET_BIND_PORT}:${ASPNETCORE_SOCKET_BIND_PORT}"
     depends_on:
