@@ -1,8 +1,8 @@
 using System;
 
-namespace Dottalk.Domain.Models
+namespace Dottalk.App.DTOs
 {
-    public class ChatMessage
+    public class ChatMessageDTO
     {
         public Guid UserId;
         public string Message;
