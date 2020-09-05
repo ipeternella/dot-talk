@@ -2,7 +2,9 @@ using System;
 
 namespace Dottalk.App.Ports
 {
-    public interface IMessageRepository
+    // Summary
+    //   Interface for persisting/reading user info.
+    public interface IUserRepository
     {
         public void Save(string msg, Guid userId, Guid chatRoomId);
     }

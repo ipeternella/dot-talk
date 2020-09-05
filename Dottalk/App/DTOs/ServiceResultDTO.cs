@@ -2,20 +2,20 @@ using System.Collections.Generic;
 
 namespace Dottalk.App.DTOs
 {
-    public class VoidServiceResult
+    public class VoidServiceResultDTO
     {
         public bool Success;
-        public IEnumerable<ServiceError> Errors;
+        public IEnumerable<ServiceErrorDTO> Errors;
     }
 
-    public class ServiceResult<TResult>
+    public class ServiceResultDTO<TResult>
     {
         public bool Success;
-        public IEnumerable<ServiceError> Errors;
+        public IEnumerable<ServiceErrorDTO> Errors;
         public TResult Result;
     }
 
-    public class ServiceError
+    public class ServiceErrorDTO
     {
         public int Code;
         public string Msg;

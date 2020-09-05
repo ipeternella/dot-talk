@@ -2,7 +2,7 @@ using System;
 
 namespace Dottalk.App.Ports
 {
-    public interface IWebSocketConnectionPool
+    public interface IWebSocketConnectionPoolManager
     {
         public void AddWebSocket(Guid chatRoomId, Guid userId);
         public void RemoveWebSocket(Guid chatRoomId, Guid userId);
