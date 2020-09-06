@@ -1,6 +1,6 @@
 using System;
 
-namespace Dottalk.Domain.Models
+namespace Dottalk.App.Domain.Models
 {
     public class ChatMessage
     {

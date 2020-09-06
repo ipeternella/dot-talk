@@ -1,4 +1,4 @@
-namespace Dottalk.Domain.Models
+namespace Dottalk.App.Domain.Models
 {
     // Summary:
     //   Represents a chat user.

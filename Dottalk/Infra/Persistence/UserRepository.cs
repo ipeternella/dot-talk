@@ -1,6 +1,6 @@
 using System;
 
-namespace Dottalk.Infra
+namespace Dottalk.Infra.Persistence
 {
     // Summary
     //   Repository for persisting/reading chat users data.

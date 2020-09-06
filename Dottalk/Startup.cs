@@ -1,3 +1,5 @@
+using System;
+using Dottalk.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +22,7 @@ namespace Dottalk
         {
             services.AddHttpContextAccessor();
             services.AddControllers();
+            services.AddSignalR();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -32,13 +35,13 @@ namespace Dottalk
             {
                 app.UseHttpsRedirection();
             }
-
             app.UseSerilogRequestLogging();
             app.UseRouting();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHubController>("/chathub");
             });
         }
     }

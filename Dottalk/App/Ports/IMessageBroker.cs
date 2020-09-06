@@ -10,7 +10,7 @@ namespace Dottalk.App.Ports
     //   interface to subscribe to a channel.
     public interface IMessageBRoker
     {
-        public void Publish(ChatMessageDTO msg, List<string> channels);
+        public void Publish(ChatMessageDTO msg, IEnumerable<string> channels);
         public void Publish(ChatMessageDTO msg, string channel);
         public void Subscribe(string channel);
     }

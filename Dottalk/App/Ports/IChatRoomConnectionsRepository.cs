@@ -11,6 +11,6 @@ namespace Dottalk.App.Ports
         public void AddConnection(Guid chatRoomId, Guid userId, Guid nodeId);
         public void RemoveConnection(Guid chatRoomId, Guid userId, Guid nodeId);
         public int TotalActiveConnections(Guid chatRoomId);
-        public ChatRoomConnections GetChatRoomConnections(Guid chatRoomId);
+        public ChatRoomConnectionsDTO GetChatRoomConnections(Guid chatRoomId);
     }
 }
