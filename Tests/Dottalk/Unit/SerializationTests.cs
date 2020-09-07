@@ -51,12 +51,13 @@ namespace Tests.Dottalk.Unit
                 ServerInstanceUsers = new List<ServerInstanceUsersDTO>() { serverInstanceUsers1, serverInstanceUsers2 }
             };
 
-            // act
+            // act -- serializes a complex object using the app settings
             var serializedChatRoomConnectionsStr = JsonConvert.SerializeObject(chatRoomConnections);
+
+            // assert - guarantees camelCase and not PascalCase on the jsons
             var jsonChatRoomConnection = JObject.Parse(serializedChatRoomConnectionsStr);
             var serverInstances = (JArray)jsonChatRoomConnection["serverInstanceUsers"];
 
-            // assert - guarantees camelCase and not PascalCase on the jsons
             Assert.Equal(4, jsonChatRoomConnection["totalActiveConnections"].Value<int>());
             Assert.Equal(2, serverInstances.Count);
 
