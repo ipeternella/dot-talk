@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Dottalk.App.Domain.Models;
 using Dottalk.App.Ports;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +29,6 @@ namespace Dottalk.Infra.Persistence
 
         public void AddChatRoomConnection(Guid chatRoomId, Guid userId, Guid ServerInstanceId)
         {
-            // now we know how to serialize DTOs...
             throw new NotImplementedException();
         }
 
@@ -45,6 +45,7 @@ namespace Dottalk.Infra.Persistence
         public ChatRoomConnections GetChatRoomConnections(Guid chatRoomId)
         {
             throw new NotImplementedException();
+            // await _redisDb.StringGetAsync(chatRoomId.ToString());
         }
     }
 }

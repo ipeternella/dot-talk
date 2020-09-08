@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Dottalk.App.DTOs
 {
-    public class ServiceResulVoidtDTO
+    public class ServiceResultVoidDTO
     {
         public bool Success;
         public IEnumerable<ServiceErrorDTO> Errors;
