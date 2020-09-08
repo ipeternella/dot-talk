@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dottalk.App.Domain.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -68,6 +69,48 @@ namespace Tests.Dottalk.Unit
                 jsonChatRoomConnection["serverInstances"][0]["serverInstanceId"].Value<string>());
             Assert.Equal(serverInstanceId2.ToString(),
                 jsonChatRoomConnection["serverInstances"][1]["serverInstanceId"].Value<string>());
+        }
+
+        [Fact(DisplayName = "Should deserialize a connection object properly")]
+        public void TestShouldDeserializeAConnectionObject()
+        {
+            // arrange
+            var chatRoomConnections = @"
+            {
+                'chatRoomId': '6576b56b-8c96-47d0-b17f-70ef3d84bfda',
+                'activeConnectionsLimit': 6,
+                'totalActiveConnections': 5,
+                'serverInstances': [
+                    {   
+                        'serverInstanceId': '4945c63c-0e8b-4fb2-810b-5c8071091e04', 
+                        'connectedUsers': [
+                            '1c101959-b95e-4c08-bd69-a2e1ee759646', 
+                            '8e9404e6-ba38-4118-9a19-0060314be702', 
+                            '1f5ee50d-6e78-4ed7-bc65-4b69ada9de8a'
+                        ]
+                    },
+                    {   'serverInstanceId': 'c4bf9cba-815e-4b20-a23b-fd404ab6fa15',
+                        'connectedUsers': [
+                            '37bb6e69-167a-4a52-b14d-442d6ba27871', 
+                            '9fd878fc-f3bf-4bb0-903c-0d81627b8412'
+                        ]
+                    }
+                ]
+            }";
+
+            // act
+            var deserializedConns = JsonConvert.DeserializeObject<ChatRoomConnections>(chatRoomConnections);
+
+            // assert            
+            Assert.Equal("6576b56b-8c96-47d0-b17f-70ef3d84bfda", deserializedConns.ChatRoomId.ToString());
+            Assert.Equal(6, deserializedConns.ActiveConnectionsLimit);
+            Assert.Equal(5, deserializedConns.TotalActiveConnections);
+
+            Assert.Equal("4945c63c-0e8b-4fb2-810b-5c8071091e04", deserializedConns.ServerInstances.First().ServerInstanceId.ToString());
+            Assert.Equal(3, deserializedConns.ServerInstances.First().ConnectedUsers.Count());
+
+            Assert.Equal("c4bf9cba-815e-4b20-a23b-fd404ab6fa15", deserializedConns.ServerInstances.ElementAt(1).ServerInstanceId.ToString());
+            Assert.Equal(2, deserializedConns.ServerInstances.ElementAt(1).ConnectedUsers.Count());
         }
     }
 }
