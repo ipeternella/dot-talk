@@ -24,7 +24,7 @@ namespace Dottalk
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHttpContextAccessor()
-                .AddDbContext<DBContext>(options => options.UseNpgsql(Configuration.GetValue<string>("")))
+                .AddDbContext<DBContext>(options => options.UseNpgsql(Configuration.GetValue<string>("Databases:Postgres:ConnectionString")))
                 .AddControllers();
 
             services.AddSignalR();
