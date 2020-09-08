@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
-using Dottalk.App.DTOs;
 using Dottalk.Controllers;
+using Dottalk.Infra.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,6 +24,7 @@ namespace Dottalk
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHttpContextAccessor()
+                .AddDbContext<DBContext>(options => options.UseNpgsql(Configuration.GetValue<string>("")))
                 .AddControllers();
 
             services.AddSignalR();
