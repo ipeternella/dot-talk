@@ -25,9 +25,7 @@ namespace Dottalk.App.Services
         public ServiceResultVoidDTO AddConnection(Guid userId, Guid chatRoomId)
         {
             // 0. Assert that such user and chat room exist!
-            // 1. Get chat room connections (if exists)
-
-
+            // 1. Get chat room connections (if exists)x
             // 2. If ActiveConnectionsLimit < TotalActiveConnectionsLimit -> update the connections store
             // 3. If not, return false and refuse the connection.
             throw new NotImplementedException();

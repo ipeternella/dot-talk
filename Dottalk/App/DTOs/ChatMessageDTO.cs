@@ -5,6 +5,6 @@ namespace Dottalk.App.DTOs
     public class ChatMessageDTO
     {
         public Guid UserId;
-        public string Message;
+        public string Message = default!;
     }
 }

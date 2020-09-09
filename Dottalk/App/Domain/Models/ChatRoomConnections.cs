@@ -31,7 +31,7 @@ namespace Dottalk.App.Domain.Models
         public Guid ChatRoomId;
         public int ActiveConnectionsLimit;
         public int TotalActiveConnections;
-        public IEnumerable<ServerInstance> ServerInstances;
+        public IEnumerable<ServerInstance> ServerInstances = null!;
     }
     //
     // Summary:
@@ -39,6 +39,6 @@ namespace Dottalk.App.Domain.Models
     public class ServerInstance
     {
         public Guid ServerInstanceId;
-        public IEnumerable<Guid> ConnectedUsers;
+        public IEnumerable<Guid> ConnectedUsers = null!;
     }
 }

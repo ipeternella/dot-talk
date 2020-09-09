@@ -9,11 +9,11 @@ namespace Dottalk.App.Ports
     {
         // Summary:
         //   Asserts that the room is not full and updates the active connections repository.
-        public ServiceResultVoidDTO AddConnection(Guid userId, Guid chatRoomId, Guid ServerInstanceId);
+        public ServiceResultVoidDTO AddConnection(Guid userId, Guid chatRoomId);
 
         // Summary:
         //   Updates the active connections repository, freeing space for another user to join the room.
-        // public ServiceResultVoidDTO RemoveConnection(Guid userId, Guid chatRoomId, Guid ServerInstanceId);
+        // public ServiceResultVoidDTO RemoveConnection(Guid userId, Guid chatRoomId);
 
         // Summary:
         //   Processes commands from users, checking if there are commands, if the syntax is alright, etc. 
