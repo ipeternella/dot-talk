@@ -24,8 +24,14 @@ services:
       - "${ASPNETCORE_SOCKET_BIND_PORT}:${ASPNETCORE_SOCKET_BIND_PORT}"
     depends_on:
       - db
+      - redis
     command:
       [
+        "./Scripts/wait-for-it.sh",
+        "redis:6379",
+        "-t",
+        "120",
+        "--",
         "./Scripts/wait-for-it.sh",
         "db:5432",
         "-t",
