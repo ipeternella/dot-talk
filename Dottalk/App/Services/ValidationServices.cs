@@ -8,7 +8,6 @@ namespace Dottalk.App.Services
 {
     public class ChatRoomCreationValidator : AbstractValidator<ChatRoomCreationDTO>
     {
-
         public ChatRoomCreationValidator()
         {
             RuleFor(dto => dto.ChatRoomName)
