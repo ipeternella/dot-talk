@@ -25,6 +25,7 @@ namespace Dottalk
         {
             services.AddHttpContextAccessor()
                 .AddDbContext<DBContext>(options => options.UseNpgsql(Configuration.GetValue<string>("Databases:Postgres:ConnectionString")))
+                .AddSingleton(options => ActivatorUtilities.CreateInstance<RedisContext>(options, Configuration))
                 .AddControllers();
 
             services.AddSignalR();

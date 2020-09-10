@@ -1,5 +1,10 @@
 version: "3.5"
 services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
   db:
     image: postgres:10.1-alpine
     ports:
