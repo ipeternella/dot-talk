@@ -27,18 +27,24 @@ namespace Dottalk.Infra.Persistence
         }
         //
         // Summary:
-        //   Gets a key from Redis and deserializes it to a specific type.
-        public async Task<T> GetKey<T>(string keyName)
+        //   Gets a key from Redis and deserializes it to a specific type. If key is not found,
+        //   returns the default value of the generid type T.
+        public async Task<T?> GetKey<T>(string keyName) where T : class
         {
             var redisValue = await DB.StringGetAsync(keyName);
+            if (redisValue.IsNull) return default;
+
             return JsonConvert.DeserializeObject<T>(redisValue);
         }
         //
         // Summary:
-        //   Gets a key from Redis and deserializes it to a specific type based on a Guid key.
-        public async Task<T> GetKey<T>(Guid keyName)
+        //   Gets a key from Redis and deserializes it to a specific type based on a Guid key. If key is not found,
+        //   returns the default value of the generid type T.
+        public async Task<T?> GetKey<T>(Guid keyName) where T : class
         {
             var redisValue = await DB.StringGetAsync(keyName.ToString());
+            if (redisValue.IsNull) return default;
+
             return JsonConvert.DeserializeObject<T>(redisValue);
         }
         //

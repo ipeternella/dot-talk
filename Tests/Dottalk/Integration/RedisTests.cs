@@ -34,14 +34,33 @@ namespace Tests.Dottalk.Unit
 
             // act
             await _redis.SetKey(chatRoomId, chatRoomConnection, TimeSpan.FromMinutes(1));
-            var persistedChatRoomConnections = await _redis.GetKey<ChatRoomConnections>(chatRoomId);
 
             // assert
+            var persistedChatRoomConnections = await _redis.GetKey<ChatRoomConnections>(chatRoomId);
+
             Assert.Equal(6, persistedChatRoomConnections.ActiveConnectionsLimit);
             Assert.Equal(4, persistedChatRoomConnections.TotalActiveConnections);
             Assert.Equal(2, persistedChatRoomConnections.ServerInstances.Count());
             Assert.Equal(chatRoomConnection.ServerInstances.ElementAt(1).ServerInstanceId.ToString(),
                 persistedChatRoomConnections.ServerInstances.ElementAt(1).ServerInstanceId.ToString());
+        }
+
+        [Fact(DisplayName = "Should return a null value from Redis when the key is not found")]
+        public async Task TestShouldRetunNullFromRedisWhenKeyIsNotFound()
+        {
+            // arrange
+            var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomConnectionsWithFourUsers();
+
+            // act
+            await _redis.SetKey("someKey", chatRoomConnection, null);
+
+            // assert
+            var nonExistentChatRoom = await _redis.GetKey<ChatRoomConnections>("anotherKey");
+            var existentChatRoom = await _redis.GetKey<ChatRoomConnections>("someKey");
+
+            Assert.Null(nonExistentChatRoom);
+            Assert.NotNull(existentChatRoom);
+            Assert.Equal(chatRoomConnection.ChatRoomId, existentChatRoom.ChatRoomId);
         }
     }
 }
