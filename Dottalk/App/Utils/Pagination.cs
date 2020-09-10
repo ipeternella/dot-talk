@@ -7,10 +7,20 @@ namespace Dottalk.App.Utils
     //   Parameters used for pagination.
     public class PaginationParams
     {
-        private const int maxPageSize = 50;
-        public int pageNumber { get; set; } = 1;
-        private int _pageSize = 10;
-        public int pageSize
+        //
+        // Constraints for pagination: max, min and default values
+        private const int MAX_PAGE_SIZE = 50;
+        private const int MIN_PAGE_SIZE = 1;
+        private const int MIN_PAGE_NUMBER = 1;
+        private const int DEFAULT_PAGE_SIZE = 10;
+        private const int DEFAULT_PAGE_NUMBER = 1;
+
+        private int _pageSize = DEFAULT_PAGE_SIZE;
+        private int _pageNumber = DEFAULT_PAGE_NUMBER;
+        //
+        // Summary:
+        //   Checks if the page size contains a valid number and sets it accordingly.
+        public int PageSize
         {
             get
             {
@@ -18,13 +28,44 @@ namespace Dottalk.App.Utils
             }
             set
             {
-                _pageSize = (value > maxPageSize) ? maxPageSize : value;
+                if (value >= MAX_PAGE_SIZE)
+                {
+                    _pageSize = MAX_PAGE_SIZE;
+                }
+                else if (value < MIN_PAGE_SIZE)
+                {
+                    _pageSize = MIN_PAGE_SIZE;
+                }
+                else
+                {
+                    _pageSize = value;
+                }
             }
         }
-
-        public int itemsToSkip
+        //
+        // Summary:
+        //   Checks if the page number contains a valid number and sets it accordingly.
+        public int PageNumber
         {
-            get { return (pageNumber - 1) * pageSize; }
+            get
+            {
+                return _pageNumber;
+            }
+            set
+            {
+                if (value < MIN_PAGE_NUMBER)
+                {
+                    _pageNumber = DEFAULT_PAGE_NUMBER;
+                }
+                else
+                {
+                    _pageNumber = value;
+                }
+            }
+        }
+        public int ItemsToSkip
+        {
+            get { return (PageNumber - 1) * PageSize; }
         }
     }
     //
@@ -34,7 +75,7 @@ namespace Dottalk.App.Utils
     {
         public static IQueryable<T> GetPage<T>(this IOrderedQueryable<T> query, PaginationParams paginationParams)
         {
-            return query.Skip(paginationParams.itemsToSkip).Take(paginationParams.pageSize);
+            return query.Skip(paginationParams.ItemsToSkip).Take(paginationParams.PageSize);
         }
     }
 }
