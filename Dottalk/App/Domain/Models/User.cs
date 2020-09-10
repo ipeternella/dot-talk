@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dottalk.App.Domain.Models
@@ -10,5 +11,7 @@ namespace Dottalk.App.Domain.Models
         [Required]
         [MaxLength(255)]
         public string Name { get; set; } = null!;
+        // navigation property
+        public ICollection<ChatMessage> ChatMessages { get; set; } = null!;
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dottalk.App.Domain.Models
@@ -13,5 +14,8 @@ namespace Dottalk.App.Domain.Models
 
         [Range(2, 10)]
         public int ActiveConnectionsLimit { get; set; }
+
+        // navigation property
+        public ICollection<ChatMessage> ChatMessages { get; set; } = null!;
     }
 }
