@@ -11,6 +11,7 @@ namespace Dottalk.App.DTOs.Mapping
         public DTO2Domain()
         {
             CreateMap<ChatRoomCreationRequestDTO, ChatRoom>();
+            CreateMap<UserCreationRequestDTO, User>();
         }
     }
 }

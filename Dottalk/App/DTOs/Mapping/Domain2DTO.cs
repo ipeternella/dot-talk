@@ -10,7 +10,8 @@ namespace Dottalk.App.DTOs.Mapping
     {
         public Domain2DTO()
         {
-            CreateMap<ChatRoom, ChatRoomCreationResponseDTO>();
+            CreateMap<ChatRoom, ChatRoomResponseDTO>();
+            CreateMap<User, UserResponseDTO>();
         }
     }
 }

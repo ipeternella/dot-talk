@@ -13,14 +13,14 @@ namespace Hangman.Controllers.V1
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class ChatRoomController : ControllerBase
+    public class UserController : ControllerBase
     {
-        private readonly IChatRoomService _chatRoomService;
+        private readonly IUserService _userService;
         private readonly ILogger<ChatRoomController> _logger;
 
-        public ChatRoomController(ILogger<ChatRoomController> logger, IChatRoomService chatRoomService)
+        public UserController(ILogger<ChatRoomController> logger, IUserService userService)
         {
-            _chatRoomService = chatRoomService;
+            _userService = userService;
             _logger = logger;
         }
 
@@ -28,11 +28,11 @@ namespace Hangman.Controllers.V1
         [Route("{id}")]
         public async Task<ActionResult> GetById(Guid id)
         {
-            _logger.LogInformation($"Getting chat room by the id: {id}");
+            _logger.LogInformation($"Getting user by the id: {id}");
 
             try
             {
-                var result = await _chatRoomService.GetChatRoom(id);
+                var result = await _userService.GetUser(id);
                 return Ok(result);
             }
             catch (ObjectDoesNotExistException e)
@@ -44,24 +44,24 @@ namespace Hangman.Controllers.V1
         [HttpGet]
         public async Task<ActionResult> All([FromQuery] PaginationParams paginationParams)
         {
-            var chatRooms = await _chatRoomService.GetAllChatRooms(paginationParams);
+            var chatRooms = await _userService.GetAllUsers(paginationParams);
 
             return Ok(chatRooms);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] ChatRoomCreationRequestDTO chatRoomCreationRequestDTO)
+        public async Task<ActionResult> Create([FromBody] UserCreationRequestDTO userCreationRequestDTO)
         {
-            _logger.LogInformation($"New chat room request: {chatRoomCreationRequestDTO}");
+            _logger.LogInformation($"New user request: {userCreationRequestDTO}");
 
-            var validator = new ChatRoomCreationValidator();
-            var validationResult = validator.Validate(chatRoomCreationRequestDTO);
+            var validator = new UserCreationValidator();
+            var validationResult = validator.Validate(userCreationRequestDTO);
 
             if (!validationResult.IsValid) return BadRequest(validationResult.Errors);
 
             try
             {
-                var result = await _chatRoomService.CreateChatRoom(chatRoomCreationRequestDTO);
+                var result = await _userService.CreateUser(userCreationRequestDTO);
                 return StatusCode(201, result);
             }
             catch (ObjectAlreadyExistsException e)

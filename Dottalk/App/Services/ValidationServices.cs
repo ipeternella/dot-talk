@@ -21,4 +21,16 @@ namespace Dottalk.App.Services
                 .WithMessage("Maximum active user connections must be a value between 2 and 10 concurrent users.");
         }
     }
+
+    public class UserCreationValidator : AbstractValidator<UserCreationRequestDTO>
+    {
+        public UserCreationValidator()
+        {
+            RuleFor(dto => dto.Name)
+                .NotEmpty()
+                .MaximumLength(100)
+                .Matches("[a-zA-Z]")
+                .WithMessage("User name must contain only letters and be up to 100 chars.");
+        }
+    }
 }
