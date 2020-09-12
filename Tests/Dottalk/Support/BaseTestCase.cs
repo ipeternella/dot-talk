@@ -36,6 +36,7 @@ namespace Tests.Hangman.Support
             var server = new TestServer(builder);
             var serviceProvider = server.Host.Services;
 
+            // Utility variables used by the tests
             Client = server.CreateClient();
             ServiceProvider = serviceProvider;  // service provider for test classes to retrieve services from ServiceCollection
             DB = serviceProvider.GetRequiredService<DBContext>();
