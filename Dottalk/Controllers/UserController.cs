@@ -11,6 +11,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Hangman.Controllers.V1
 {
+    //
+    // Summary:
+    //   Controller used to manage CRUD operations for the users.
     [ApiController]
     [Route("api/v1/[controller]")]
     public class UserController : ControllerBase
