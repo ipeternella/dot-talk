@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dottalk.App.DTOs;
+using Dottalk.App.Exceptions;
+using Dottalk.App.Ports;
 using Dottalk.App.Services;
 using Dottalk.App.Utils;
 using Dottalk.Infra.Persistence;
@@ -15,11 +17,13 @@ namespace Hangman.Controllers.V1
     [Route("api/v1/[controller]")]
     public class ChatRoomController : ControllerBase
     {
+        private readonly IChatRoomService _chatRoomService;
         private readonly ILogger<ChatRoomController> _logger;
         private readonly DBContext _db;
 
-        public ChatRoomController(ILogger<ChatRoomController> logger, DBContext db)
+        public ChatRoomController(ILogger<ChatRoomController> logger, DBContext db, IChatRoomService chatRoomService)
         {
+            _chatRoomService = chatRoomService;
             _logger = logger;
             _db = db;
         }
@@ -42,14 +46,22 @@ namespace Hangman.Controllers.V1
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] ChatRoomCreationDTO chatRoomCreationDTO)
+        public async Task<ActionResult> Create([FromBody] ChatRoomCreationRequestDTO chatRoomCreationRequestDTO)
         {
             var validator = new ChatRoomCreationValidator();
-            var validationResult = validator.Validate(chatRoomCreationDTO);
+            var validationResult = validator.Validate(chatRoomCreationRequestDTO);
 
             if (!validationResult.IsValid) return BadRequest(validationResult.Errors);
 
-            return Ok();
+            try
+            {
+                var result = await _chatRoomService.CreateChatRoom(chatRoomCreationRequestDTO);
+                return StatusCode(201, result);
+            }
+            catch (ChatRoomAlreadyExistsException e)
+            {
+                return BadRequest(new ServiceErrorDTO { Message = e.Message });
+            }
         }
     }
 }
