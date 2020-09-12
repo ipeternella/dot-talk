@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dottalk.App.Domain.Models;
+using Dottalk.App.Ports;
+using Dottalk.App.Services;
 using Dottalk.Controllers;
 using Dottalk.Infra.Persistence;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Serilog;
+using AutoMapper;
 
 namespace Dottalk
 {
@@ -30,6 +33,8 @@ namespace Dottalk
             services.AddHttpContextAccessor()
                 .AddDbContext<DBContext>(options => options.UseNpgsql(Configuration.GetValue<string>("Databases:Postgres:ConnectionString")))
                 .AddSingleton(options => ActivatorUtilities.CreateInstance<RedisContext>(options, Configuration))
+                .AddScoped<IChatRoomService, ChatRoomService>()
+                .AddAutoMapper(typeof(Startup))
                 .AddControllers();
 
             services.AddSignalR();
