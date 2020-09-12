@@ -39,3 +39,18 @@ services:
         "--",
         "./Scripts/start-from-compose.sh",
       ]
+
+  # testing services
+  redis_test:
+    image: redis:latest
+    ports:
+      - "6369:6369"
+
+  db_test:
+    image: postgres:10.1-alpine
+    ports:
+      - "5422:5422"
+    environment:
+      POSTGRES_USER: dottalk
+      POSTGRES_PASSWORD: dottalk
+      POSTGRES_DB: dottalk
