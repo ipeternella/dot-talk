@@ -1,15 +1,19 @@
 using System;
+using System.Threading.Tasks;
+using Dottalk.App.Domain.Models;
 using Dottalk.App.DTOs;
 
 namespace Dottalk.App.Ports
 {
+    //
     // Summary:
     //   Defines the main usecases of the chat application that can be used.
     public interface IChatRoomService
     {
+        //
         // Summary:
         //   Asserts that the room is not full and updates the active connections repository.
-        public ServiceResultVoidDTO AddConnection(Guid userId, Guid chatRoomId);
+        Task<ChatRoomCreationResponseDTO> CreateChatRoom(ChatRoomCreationRequestDTO chatRoomCreationRequestDTO);
 
         // Summary:
         //   Updates the active connections repository, freeing space for another user to join the room.

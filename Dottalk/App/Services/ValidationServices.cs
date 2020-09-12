@@ -6,11 +6,11 @@ using FluentValidation;
 //   Validators used by the application based on Fluent Validation.
 namespace Dottalk.App.Services
 {
-    public class ChatRoomCreationValidator : AbstractValidator<ChatRoomCreationDTO>
+    public class ChatRoomCreationValidator : AbstractValidator<ChatRoomCreationRequestDTO>
     {
         public ChatRoomCreationValidator()
         {
-            RuleFor(dto => dto.ChatRoomName)
+            RuleFor(dto => dto.Name)
                 .NotEmpty()
                 .MaximumLength(100)
                 .Matches("[a-zA-Z]")
