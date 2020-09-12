@@ -34,6 +34,7 @@ namespace Dottalk
                 .AddDbContext<DBContext>(options => options.UseNpgsql(Configuration.GetValue<string>("Databases:Postgres:ConnectionString")))
                 .AddSingleton(options => ActivatorUtilities.CreateInstance<RedisContext>(options, Configuration))
                 .AddScoped<IChatRoomService, ChatRoomService>()
+                .AddScoped<IUserService, UserService>()
                 .AddAutoMapper(typeof(Startup))
                 .AddControllers();
 
@@ -107,7 +108,15 @@ namespace Dottalk
                 new ChatRoom {Name = "Chat Room 3", ActiveConnectionsLimit = 10}
             };
 
+            var users = new List<User>
+            {
+                new User {Name = "User A"},
+                new User {Name = "User B"},
+                new User {Name = "User C"}
+            };
+
             context.AddRange(chatRooms);
+            context.AddRange(users);
             context.SaveChanges();
 
             logger.LogInformation("Database has been seeded successfully.");
