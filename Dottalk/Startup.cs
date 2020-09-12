@@ -102,9 +102,9 @@ namespace Dottalk
             logger.LogInformation("Saving entities...");
             var chatRooms = new List<ChatRoom>
             {
-                new ChatRoom {Name = "Chat Room 1"},
-                new ChatRoom {Name = "Chat Room 2"},
-                new ChatRoom {Name = "Chat Room 3"}
+                new ChatRoom {Name = "Chat Room 1", ActiveConnectionsLimit = 4},
+                new ChatRoom {Name = "Chat Room 2", ActiveConnectionsLimit = 6},
+                new ChatRoom {Name = "Chat Room 3", ActiveConnectionsLimit = 10}
             };
 
             context.AddRange(chatRooms);

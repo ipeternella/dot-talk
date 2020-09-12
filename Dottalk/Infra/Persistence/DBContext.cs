@@ -21,6 +21,14 @@ namespace Dottalk.Infra.Persistence
         }
         //
         //  Summary:
+        //    Thin wrapper on top of save sync in order to automatically add createdAt and updatedAt fields.
+        public override int SaveChanges()
+        {
+            AutomaticallyAddCreatedAndUpdatedAt();
+            return base.SaveChanges();
+        }
+        //
+        //  Summary:
         //    Thin wrapper on top of save async in order to automatically add createdAt and updatedAt fields.
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
