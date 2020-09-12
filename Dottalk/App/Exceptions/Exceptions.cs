@@ -5,18 +5,35 @@ namespace Dottalk.App.Exceptions
     //
     // Summary:
     //   Collection of exceptions that can be raised by the app.
-    public class ChatRoomAlreadyExistsException : Exception
+    public class ObjectAlreadyExistsException : Exception
     {
-        public ChatRoomAlreadyExistsException()
+        public ObjectAlreadyExistsException()
         {
         }
 
-        public ChatRoomAlreadyExistsException(string message)
+        public ObjectAlreadyExistsException(string message)
             : base(message)
         {
         }
 
-        public ChatRoomAlreadyExistsException(string message, Exception inner)
+        public ObjectAlreadyExistsException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+    }
+
+    public class ObjectDoesNotExistException : Exception
+    {
+        public ObjectDoesNotExistException()
+        {
+        }
+
+        public ObjectDoesNotExistException(string message)
+            : base(message)
+        {
+        }
+
+        public ObjectDoesNotExistException(string message, Exception inner)
             : base(message, inner)
         {
         }
