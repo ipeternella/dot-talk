@@ -1,11 +1,13 @@
 using System.Threading.Tasks;
 using Dottalk.App.DTOs;
+using Dottalk.App.Ports;
+using Microsoft.Extensions.DependencyInjection;
 using Tests.Hangman.Support;
 using Xunit;
 
 namespace Tests.Dottalk.Integration
 {
-    public class ChatRoomServiceTests : BaseTestCase
+    public class ChatRoomServiceTests : BaseTestCase<TestingStartUp>
     {
         [Fact(DisplayName = "Chat room service should create and retrive a new chat room")]
         public async Task TestChatRoomServiceShouldCreateAndRetrieveNewChatRoom()
@@ -16,9 +18,10 @@ namespace Tests.Dottalk.Integration
                 Name = "New chat room",
                 ActiveConnectionsLimit = 4
             };
+            var chatRoomService = ServiceProvider.GetRequiredService<IChatRoomService>();
 
             // act
-            var result = await ChatRoomService.CreateChatRoom(newChatRoomRequest);
+            var result = await chatRoomService.CreateChatRoom(newChatRoomRequest);
 
             // assert
             var persistedChatRoom = await DB.ChatRooms.FindAsync(result.Id);

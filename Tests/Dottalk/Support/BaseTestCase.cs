@@ -1,88 +1,51 @@
 using System;
-using System.IO;
 using System.Net.Http;
-using AutoMapper;
-using Dottalk;
-using Dottalk.App.Ports;
-using Dottalk.App.Services;
 using Dottalk.Infra.Persistence;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Serilog;
-using Tests.Dottalk.Support;
 
 namespace Tests.Hangman.Support
 {
     //
     //  Summary:
-    //    Base test case to be inherited when a testing web server is not used or is just too much for the tests.
-    //    This class can handle transactions/rollbacks automatically for restoring the database state.
-    public class BaseTestCase : IDisposable
+    //    Base test case to be inherited when a full end-to-end testing is desired, e.g., full integration tests
+    //    of the web host endpoints, or tests that require full dependency injection setup according to the
+    //    TStartup configuration. This class can handle transactions/rollbacks automatically for restoring the database state.
+    //
+    //    Many start up classes can be used so that different mocks and DI setup can be configured and use by the tests.
+    public class BaseTestCase<TStartup> : IDisposable where TStartup : class
     {
+        // private state managed by the base test case
         private readonly IDbContextTransaction _transaction;
-        protected readonly HttpClient Client;  // subclasses can use
-        protected DBContext DB { get; }
-        protected IChatRoomService ChatRoomService { get; }
-        protected TestingScenarioBuilder TestingScenarioBuilder { get; set; }
+
+        // variables for subclasses
+        protected IServiceProvider ServiceProvider;  // Services for calling on tests
+        protected readonly HttpClient Client;  // HTTP client for full endpoint testing
+        protected DBContext DB { get; }  // DB for reaching the database for asserts
 
         public BaseTestCase()
         {
-            // builds configuration based on jsons and env variables
-            var env = Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT");
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            // TStartup is used to configure DI with services and mocked services on the ServiceCollection
+            var builder = WebHost.CreateDefaultBuilder()
+                .UseStartup<TStartup>()
+                .UseSerilog();
+            var server = new TestServer(builder);
+            var serviceProvider = server.Host.Services;
 
-            if (env != null) configuration.AddJsonFile($"appsettings.{env}.json", optional: true);  // local development: stdout
-            var builtConfig = configuration.AddEnvironmentVariables().Build();
-
-            // builds DI container by setting up all the services
-            var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection, builtConfig);
-
-            // builds service provider from the DI container to get services
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-
-            // Services to be used by the tests
+            Client = server.CreateClient();
+            ServiceProvider = serviceProvider;  // service provider for test classes to retrieve services from ServiceCollection
             DB = serviceProvider.GetRequiredService<DBContext>();
-            ChatRoomService = serviceProvider.GetRequiredService<IChatRoomService>();
-            TestingScenarioBuilder = new TestingScenarioBuilder();
 
-            // Transactions used on every test -- add DB, Mongo, etc.
+            // Transaction used on every test  -- add other transactions if desired: Mongo, etc.
             _transaction = DB.Database.BeginTransaction();
         }
-
-        public void ConfigureServices(IServiceCollection services, IConfigurationRoot configuration)
-        {
-            // this is required to add the controllers of the main project
-            var startupAssembly = typeof(Startup).Assembly;
-
-            services.AddHttpContextAccessor()
-                .AddDbContext<DBContext>(options => options.UseNpgsql(configuration.GetValue<string>("Databases:Postgres:ConnectionString")), ServiceLifetime.Singleton)
-                .AddSingleton(options => ActivatorUtilities.CreateInstance<RedisContext>(options, configuration))
-                .AddScoped<IChatRoomService, ChatRoomService>()
-                .AddScoped<IUserService, UserService>()
-                .AddLogging(builder => builder.AddSerilog(dispose: true))
-                .AddAutoMapper(typeof(Startup))
-                .AddControllers();
-
-            services.AddSignalR();
-
-            // global json serialization settings
-            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new CamelCaseNamingStrategy()
-                }
-            };
-        }
-
+        //
+        //  Summary:
+        //    Tear down and state-restore to be performed after every test
         public void Dispose()
         {
             if (_transaction == null) return;

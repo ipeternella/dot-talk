@@ -18,7 +18,7 @@ namespace Tests.Hangman.Support
 {
     //
     //  Summary:
-    //   
+    //   Start up class that configures DI container and classes dependencies.
     public class TestingStartUp
     {
         public TestingStartUp(IConfiguration configuration)
@@ -34,7 +34,7 @@ namespace Tests.Hangman.Support
             var startupAssembly = typeof(Startup).Assembly;
 
             services.AddHttpContextAccessor()
-                .AddDbContext<DBContext>(options => options.UseNpgsql(Configuration.GetValue<string>("Databases:Postgres:ConnectionString")))
+                .AddDbContext<DBContext>(options => options.UseNpgsql(Configuration.GetValue<string>("Databases:Postgres:ConnectionString")), ServiceLifetime.Singleton)
                 .AddSingleton(options => ActivatorUtilities.CreateInstance<RedisContext>(options, Configuration))
                 .AddScoped<IChatRoomService, ChatRoomService>()
                 .AddScoped<IUserService, UserService>()
@@ -84,7 +84,7 @@ namespace Tests.Hangman.Support
         private void Migrate()
         {
             // testing migrations
-            var dbConnectionString = Configuration.GetConnectionString("DBConnection");
+            var dbConnectionString = Configuration.GetValue<string>("Databases:Postgres:ConnectionString");
             var options = new DbContextOptionsBuilder<DBContext>()
                 .UseNpgsql(dbConnectionString)
                 .Options;

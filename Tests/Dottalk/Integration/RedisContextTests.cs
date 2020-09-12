@@ -1,42 +1,30 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dottalk.App.Domain.Models;
 using Dottalk.Infra.Persistence;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Tests.Dottalk.Support;
+using Tests.Hangman.Support;
 using Xunit;
 
 namespace Tests.Dottalk.Unit
 {
-    public class RedisTests
+    public class RedisContextTests : BaseTestCase<TestingStartUp>
     {
-        private readonly RedisContext _redis;
-
-        public RedisTests()
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            _redis = new RedisContext(configuration);
-        }
-
         [Fact(DisplayName = "Should save a chat connection and retrieve from Redis")]
         public async Task TestShouldSaveChatConnectionAndRetrieveFromRedis()
         {
             // arrange
             var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomConnectionsWithFourUsers();
             var chatRoomId = Guid.NewGuid();
+            var redis = ServiceProvider.GetRequiredService<RedisContext>();
 
             // act
-            await _redis.SetKey(chatRoomId, chatRoomConnection, TimeSpan.FromMinutes(1));
+            await redis.SetKey(chatRoomId, chatRoomConnection, TimeSpan.FromMinutes(1));
 
             // assert
-            var persistedChatRoomConnections = await _redis.GetKey<ChatRoomConnections>(chatRoomId);
+            var persistedChatRoomConnections = await redis.GetKey<ChatRoomConnections>(chatRoomId);
 
             Assert.Equal(6, persistedChatRoomConnections.ActiveConnectionsLimit);
             Assert.Equal(4, persistedChatRoomConnections.TotalActiveConnections);
@@ -50,13 +38,14 @@ namespace Tests.Dottalk.Unit
         {
             // arrange
             var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomConnectionsWithFourUsers();
+            var redis = ServiceProvider.GetRequiredService<RedisContext>();
 
             // act
-            await _redis.SetKey("someKey", chatRoomConnection, null);
+            await redis.SetKey("someKey", chatRoomConnection, null);
 
             // assert
-            var nonExistentChatRoom = await _redis.GetKey<ChatRoomConnections>("anotherKey");
-            var existentChatRoom = await _redis.GetKey<ChatRoomConnections>("someKey");
+            var nonExistentChatRoom = await redis.GetKey<ChatRoomConnections>("anotherKey");
+            var existentChatRoom = await redis.GetKey<ChatRoomConnections>("someKey");
 
             Assert.Null(nonExistentChatRoom);
             Assert.NotNull(existentChatRoom);
