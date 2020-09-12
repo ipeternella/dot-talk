@@ -32,16 +32,22 @@ namespace Hangman.Controllers.V1
         [Route("{id}")]
         public async Task<ActionResult> GetById(Guid id)
         {
-            var chatRoom = await _db.ChatRooms.FindAsync(id);
-            if (chatRoom == null) return NotFound(new { Message = "Chat room was not found." });
-
-            return Ok(chatRoom);
+            try
+            {
+                var result = await _chatRoomService.GetChatRoom(id);
+                return Ok(result);
+            }
+            catch (ObjectDoesNotExistException e)
+            {
+                return NotFound(new ServiceErrorDTO { Message = e.Message });
+            }
         }
 
         [HttpGet]
         public async Task<ActionResult> All([FromQuery] PaginationParams paginationParams)
         {
-            var chatRooms = await _db.ChatRooms.OrderBy(room => room.Id).GetPage(paginationParams).ToListAsync();
+            var chatRooms = await _chatRoomService.GetAllChatRooms(paginationParams);
+
             return Ok(chatRooms);
         }
 
@@ -58,7 +64,7 @@ namespace Hangman.Controllers.V1
                 var result = await _chatRoomService.CreateChatRoom(chatRoomCreationRequestDTO);
                 return StatusCode(201, result);
             }
-            catch (ChatRoomAlreadyExistsException e)
+            catch (ObjectAlreadyExistsException e)
             {
                 return BadRequest(new ServiceErrorDTO { Message = e.Message });
             }

@@ -7,6 +7,7 @@ using Dottalk.App.Domain.Models;
 using Dottalk.App.DTOs;
 using Dottalk.App.Exceptions;
 using Dottalk.App.Ports;
+using Dottalk.App.Utils;
 using Dottalk.Infra.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -36,7 +37,7 @@ namespace Dottalk.App.Services
         public async Task<ChatRoomCreationResponseDTO> CreateChatRoom(ChatRoomCreationRequestDTO chatRoomCreationRequestDTO)
         {
             var roomWithSameName = await _db.ChatRooms.Where(room => room.Name == chatRoomCreationRequestDTO.Name).FirstOrDefaultAsync();
-            if (roomWithSameName != null) throw new ChatRoomAlreadyExistsException("A chat room with this name already exists.");
+            if (roomWithSameName != null) throw new ObjectAlreadyExistsException("A chat room with this name already exists.");
 
             var newChatRoom = _mapper.Map<ChatRoomCreationRequestDTO, ChatRoom>(chatRoomCreationRequestDTO);
 
@@ -44,6 +45,26 @@ namespace Dottalk.App.Services
             await _db.SaveChangesAsync();
 
             return _mapper.Map<ChatRoom, ChatRoomCreationResponseDTO>(newChatRoom);
+        }
+        //
+        // Summary:
+        //   Gets a specific chat room, if exists. Otherwise, raises an exception.
+        public async Task<ChatRoomCreationResponseDTO> GetChatRoom(Guid chatRoomId)
+        {
+            var chatRoom = await _db.ChatRooms.FindAsync(chatRoomId);
+            if (chatRoom == null) throw new ObjectDoesNotExistException("Chat room does not exist.");
+
+            return _mapper.Map<ChatRoom, ChatRoomCreationResponseDTO>(chatRoom);
+        }
+        //
+        // Summary:
+        //   Gets all chat rooms given the pagination params.
+        public async Task<IEnumerable<ChatRoomCreationResponseDTO>> GetAllChatRooms(PaginationParams? paginationParams)
+        {
+            if (paginationParams == null) paginationParams = new PaginationParams();  // default pagination params
+
+            var chatRooms = _db.ChatRooms.OrderBy(room => room.Id).GetPage(paginationParams);
+            return await _mapper.ProjectTo<ChatRoomCreationResponseDTO>(chatRooms).ToListAsync();
         }
     }
 }
