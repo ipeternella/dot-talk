@@ -11,7 +11,7 @@ namespace Tests.Dottalk.Support
 
         }
 
-        public static ChatRoomConnections BuildChatRoomConnectionsWithFourUsers()
+        public static ChatRoomActiveConnectionPool BuildChatRoomActiveConnectionPoolWithFourUsers()
         {
             var chatRoomId = Guid.NewGuid();
             var serverInstanceId1 = Guid.NewGuid();
@@ -33,7 +33,7 @@ namespace Tests.Dottalk.Support
                 ConnectedUsers = new List<Guid>() { connectedUserId3, connectedUserId4 }
             };
 
-            var chatRoomConnections = new ChatRoomConnections()
+            var chatRoomActiveConnectionPool = new ChatRoomActiveConnectionPool()
             {
                 ChatRoomId = chatRoomId,
                 TotalActiveConnections = 4,
@@ -41,7 +41,7 @@ namespace Tests.Dottalk.Support
                 ServerInstances = new List<ServerInstance>() { serverInstance1, serverInstance2 }
             };
 
-            return chatRoomConnections;
+            return chatRoomActiveConnectionPool;
         }
     }
 }

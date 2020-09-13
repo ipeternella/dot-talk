@@ -12,6 +12,7 @@ namespace Dottalk.App.Ports
     public interface IChatRoomService
     {
         Task<ChatRoomResponseDTO> GetChatRoom(Guid chatRoomId);
+        Task<ChatRoomResponseDTO> GetChatRoom(string chatRoomName);
         Task<IEnumerable<ChatRoomResponseDTO>> GetAllChatRooms(PaginationParams? paginationParams);
         Task<ChatRoomResponseDTO> CreateChatRoom(ChatRoomCreationRequestDTO chatRoomCreationRequestDTO);
 

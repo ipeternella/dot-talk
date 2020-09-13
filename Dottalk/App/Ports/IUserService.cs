@@ -12,6 +12,7 @@ namespace Dottalk.App.Ports
     public interface IUserService
     {
         Task<UserResponseDTO> GetUser(Guid userId);
+        Task<UserResponseDTO> GetUser(string userName);
         Task<IEnumerable<UserResponseDTO>> GetAllUsers(PaginationParams? paginationParams);
         Task<UserResponseDTO> CreateUser(UserCreationRequestDTO userCreationRequestDTO);
     }

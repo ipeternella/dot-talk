@@ -16,7 +16,7 @@ namespace Tests.Dottalk.Unit
         public async Task TestShouldSaveChatConnectionAndRetrieveFromRedis()
         {
             // arrange
-            var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomConnectionsWithFourUsers();
+            var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomActiveConnectionPoolWithFourUsers();
             var chatRoomId = Guid.NewGuid();
             var redis = ServiceProvider.GetRequiredService<RedisContext>();
 
@@ -24,28 +24,28 @@ namespace Tests.Dottalk.Unit
             await redis.SetKey(chatRoomId, chatRoomConnection, TimeSpan.FromMinutes(1));
 
             // assert
-            var persistedChatRoomConnections = await redis.GetKey<ChatRoomConnections>(chatRoomId);
+            var persistedChatRoomConnectionPool = await redis.GetKey<ChatRoomActiveConnectionPool>(chatRoomId);
 
-            Assert.Equal(6, persistedChatRoomConnections.ActiveConnectionsLimit);
-            Assert.Equal(4, persistedChatRoomConnections.TotalActiveConnections);
-            Assert.Equal(2, persistedChatRoomConnections.ServerInstances.Count());
+            Assert.Equal(6, persistedChatRoomConnectionPool.ActiveConnectionsLimit);
+            Assert.Equal(4, persistedChatRoomConnectionPool.TotalActiveConnections);
+            Assert.Equal(2, persistedChatRoomConnectionPool.ServerInstances.Count());
             Assert.Equal(chatRoomConnection.ServerInstances.ElementAt(1).ServerInstanceId.ToString(),
-                persistedChatRoomConnections.ServerInstances.ElementAt(1).ServerInstanceId.ToString());
+                persistedChatRoomConnectionPool.ServerInstances.ElementAt(1).ServerInstanceId.ToString());
         }
 
         [Fact(DisplayName = "Should return a null value from Redis when the key is not found")]
         public async Task TestShouldRetunNullFromRedisWhenKeyIsNotFound()
         {
             // arrange
-            var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomConnectionsWithFourUsers();
+            var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomActiveConnectionPoolWithFourUsers();
             var redis = ServiceProvider.GetRequiredService<RedisContext>();
 
             // act
             await redis.SetKey("someKey", chatRoomConnection, null);
 
             // assert
-            var nonExistentChatRoom = await redis.GetKey<ChatRoomConnections>("anotherKey");
-            var existentChatRoom = await redis.GetKey<ChatRoomConnections>("someKey");
+            var nonExistentChatRoom = await redis.GetKey<ChatRoomActiveConnectionPool>("anotherKey");
+            var existentChatRoom = await redis.GetKey<ChatRoomActiveConnectionPool>("someKey");
 
             Assert.Null(nonExistentChatRoom);
             Assert.NotNull(existentChatRoom);

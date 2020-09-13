@@ -19,15 +19,17 @@ namespace Dottalk.App.Services
     //   Chatting usecases/services offered by the application.
     public class ChatRoomService : IChatRoomService
     {
-        // private readonly IChatRoomConnectionsRepository _connectionsRepository;
+        // private readonly IChatRoomActiveConnectionPoolRepository _connectionsRepository;
         private readonly ILogger<IChatRoomService> _logger;
+        private readonly RedisContext _redis;
         private readonly IMapper _mapper;
         private readonly DBContext _db;
 
-        public ChatRoomService(ILogger<IChatRoomService> logger, DBContext db, IMapper mapper)
+        public ChatRoomService(ILogger<IChatRoomService> logger, DBContext db, IMapper mapper, RedisContext redis)
         {
             _logger = logger;
             _mapper = mapper;
+            _redis = redis;
             _db = db;
         }
         //
@@ -40,6 +42,42 @@ namespace Dottalk.App.Services
 
             return _mapper.Map<ChatRoom, ChatRoomResponseDTO>(chatRoom);
         }
+        //
+        // Summary:
+        //   Gets a specific chat room by its name, if exists. Otherwise, raises an exception.
+        public async Task<ChatRoomResponseDTO> GetChatRoom(string chatRoomName)
+        {
+            var chatRoom = await _db.ChatRooms.Where(room => room.Name == chatRoomName).FirstOrDefaultAsync();
+            if (chatRoom == null) throw new ObjectDoesNotExistException("Chat room does not exist.");
+
+            return _mapper.Map<ChatRoom, ChatRoomResponseDTO>(chatRoom);
+        }
+        // 
+        // Summary: 
+        //   Gets a connection store on redis for a give chat room (creates a new one in-memory, if it's the first one).
+        //   ChatRoomActiveConnectionPool
+        public async Task<ChatRoomActiveConnectionPool> GetOrCreateChatRoomActiveConnectionPool(string chatRoomName)
+        {
+            _logger.LogInformation("Getting connection store for chat room name: {chatRoomName:l}", chatRoomName);
+
+            var chatRoom = await GetChatRoom(chatRoomName);
+            if (chatRoom == null) throw new ObjectDoesNotExistException("Chat room does not exist.");
+
+            var chatRoomActiveConnectionPool = await _redis.GetKey<ChatRoomActiveConnectionPool>(chatRoom.Id);
+            if (chatRoomActiveConnectionPool != null) return chatRoomActiveConnectionPool;
+
+            _logger.LogInformation("Chat room had no connection store on Redis. Creating a new one...");
+            var newChatRoomActiveConnectionPool = new ChatRoomActiveConnectionPool
+            {
+                ChatRoomId = chatRoom.Id,
+                ActiveConnectionsLimit = chatRoom.ActiveConnectionsLimit,
+                TotalActiveConnections = 0,
+                ServerInstances = new List<ServerInstance>()
+            };
+
+            return newChatRoomActiveConnectionPool;
+        }
+
         //
         // Summary:
         //   Gets all chat rooms given the pagination params.

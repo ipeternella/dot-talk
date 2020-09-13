@@ -24,6 +24,16 @@ namespace Dottalk.Controllers
         //   Attempts to accept a new connection for a given chat room. Can fail if the room is full, for example.
         public async Task JoinRoom(string user, string roomName)
         {
+            //
+            // Pre-validation steps:
+            //
+            // 1. Check if the room, and the user exists
+            // 2. Check if the room has a connection store on redis, if not: create one for the user that's connecting
+            // 3. Check if the room is not full
+            //
+            // Algorithm:
+            // 3. Update chat room conns on redis            
+            // 4. Save socket in local-memory
             await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
             await SendMessage(user, $"A new user has joined the room: {user}");
             await base.OnConnectedAsync();

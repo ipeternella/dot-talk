@@ -41,6 +41,16 @@ namespace Dottalk.App.Services
         }
         //
         // Summary:
+        //   Gets a specific user by its username, if exists. Otherwise, raises an exception.
+        public async Task<UserResponseDTO> GetUser(string userName)
+        {
+            var user = await _db.Users.Where(user => user.Name == userName).FirstOrDefaultAsync();
+            if (user == null) throw new ObjectDoesNotExistException("User does not exist.");
+
+            return _mapper.Map<User, UserResponseDTO>(user);
+        }
+        //
+        // Summary:
         //   Gets all users given the pagination params.
         public async Task<IEnumerable<UserResponseDTO>> GetAllUsers(PaginationParams? paginationParams)
         {

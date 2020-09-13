@@ -47,7 +47,7 @@ namespace Tests.Dottalk.Unit
                 ConnectedUsers = new List<Guid>() { connectedUserId3, connectedUserId4 }
             };
 
-            var chatRoomConnections = new ChatRoomConnections()
+            var chatRoomConnectionPool = new ChatRoomActiveConnectionPool()
             {
                 ChatRoomId = chatRoomId,
                 TotalActiveConnections = 4,
@@ -55,10 +55,10 @@ namespace Tests.Dottalk.Unit
             };
 
             // act -- serializes a complex object using the app settings
-            var serializedChatRoomConnectionsStr = JsonConvert.SerializeObject(chatRoomConnections);
+            var serializedChatRoomConnectionPoolStr = JsonConvert.SerializeObject(chatRoomConnectionPool);
 
             // assert - guarantees camelCase and not PascalCase on the jsons
-            var jsonChatRoomConnection = JObject.Parse(serializedChatRoomConnectionsStr);
+            var jsonChatRoomConnection = JObject.Parse(serializedChatRoomConnectionPoolStr);
             var serverInstances = (JArray)jsonChatRoomConnection["serverInstances"];
 
             Assert.Equal(chatRoomId.ToString(), jsonChatRoomConnection["chatRoomId"]);
@@ -75,7 +75,7 @@ namespace Tests.Dottalk.Unit
         public void TestShouldDeserializeAConnectionObject()
         {
             // arrange
-            var chatRoomConnections = @"
+            var chatRoomConnectionPoolStr = @"
             {
                 'chatRoomId': '6576b56b-8c96-47d0-b17f-70ef3d84bfda',
                 'activeConnectionsLimit': 6,
@@ -99,18 +99,18 @@ namespace Tests.Dottalk.Unit
             }";
 
             // act
-            var deserializedConns = JsonConvert.DeserializeObject<ChatRoomConnections>(chatRoomConnections);
+            var deserializedConnectionPool = JsonConvert.DeserializeObject<ChatRoomActiveConnectionPool>(chatRoomConnectionPoolStr);
 
             // assert            
-            Assert.Equal("6576b56b-8c96-47d0-b17f-70ef3d84bfda", deserializedConns.ChatRoomId.ToString());
-            Assert.Equal(6, deserializedConns.ActiveConnectionsLimit);
-            Assert.Equal(5, deserializedConns.TotalActiveConnections);
+            Assert.Equal("6576b56b-8c96-47d0-b17f-70ef3d84bfda", deserializedConnectionPool.ChatRoomId.ToString());
+            Assert.Equal(6, deserializedConnectionPool.ActiveConnectionsLimit);
+            Assert.Equal(5, deserializedConnectionPool.TotalActiveConnections);
 
-            Assert.Equal("4945c63c-0e8b-4fb2-810b-5c8071091e04", deserializedConns.ServerInstances.First().ServerInstanceId.ToString());
-            Assert.Equal(3, deserializedConns.ServerInstances.First().ConnectedUsers.Count());
+            Assert.Equal("4945c63c-0e8b-4fb2-810b-5c8071091e04", deserializedConnectionPool.ServerInstances.First().ServerInstanceId.ToString());
+            Assert.Equal(3, deserializedConnectionPool.ServerInstances.First().ConnectedUsers.Count());
 
-            Assert.Equal("c4bf9cba-815e-4b20-a23b-fd404ab6fa15", deserializedConns.ServerInstances.ElementAt(1).ServerInstanceId.ToString());
-            Assert.Equal(2, deserializedConns.ServerInstances.ElementAt(1).ConnectedUsers.Count());
+            Assert.Equal("c4bf9cba-815e-4b20-a23b-fd404ab6fa15", deserializedConnectionPool.ServerInstances.ElementAt(1).ServerInstanceId.ToString());
+            Assert.Equal(2, deserializedConnectionPool.ServerInstances.ElementAt(1).ConnectedUsers.Count());
         }
     }
 }
