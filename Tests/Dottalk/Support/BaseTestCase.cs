@@ -26,6 +26,7 @@ namespace Tests.Hangman.Support
         protected IServiceProvider ServiceProvider;  // Services for calling on tests
         protected readonly HttpClient Client;  // HTTP client for full endpoint testing
         protected DBContext DB { get; }  // DB for reaching the database for asserts
+        protected RedisContext Redis { get; }
 
         public BaseTestCase()
         {
@@ -40,6 +41,7 @@ namespace Tests.Hangman.Support
             Client = server.CreateClient();
             ServiceProvider = serviceProvider;  // service provider for test classes to retrieve services from ServiceCollection
             DB = serviceProvider.GetRequiredService<DBContext>();
+            Redis = serviceProvider.GetRequiredService<RedisContext>();
 
             // Transaction used on every test  -- add other transactions if desired: Mongo, etc.
             _transaction = DB.Database.BeginTransaction();

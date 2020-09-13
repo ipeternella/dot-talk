@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Dottalk.App.Domain.Models;
 using Dottalk.Infra.Persistence;
 
@@ -64,6 +65,33 @@ namespace Tests.Dottalk.Support
             db.SaveChanges();
 
             return new Tuple<ChatRoom, User>(newChatRoom, newUser);
+        }
+
+        public async static Task<Tuple<ChatRoom, User, ChatRoomActiveConnectionPool>> BuildScenarioWithChatRoomAndUserWithPreviousConnectionPool(string chatRoomName,
+            int activeConnectionsLimit, string userName, DBContext db, RedisContext redis)
+        {
+            var chatRoomConnectionPool = BuildChatRoomActiveConnectionPoolWithFourUsers();
+            var newChatRoom = new ChatRoom
+            {
+                Id = chatRoomConnectionPool.ChatRoomId,
+                Name = chatRoomName,
+                ActiveConnectionsLimit = activeConnectionsLimit
+            };
+
+            var newUser = new User
+            {
+                Name = userName
+            };
+
+            // creates chat room with the same Id of the pool and a user
+            await db.ChatRooms.AddAsync(newChatRoom);
+            await db.Users.AddAsync(newUser);
+            await db.SaveChangesAsync();
+
+            // creates a connection pool for the chat room
+            await redis.SetKey<ChatRoomActiveConnectionPool>(chatRoomConnectionPool.ChatRoomId, chatRoomConnectionPool, null);
+
+            return new Tuple<ChatRoom, User, ChatRoomActiveConnectionPool>(newChatRoom, newUser, chatRoomConnectionPool);
         }
     }
 }
