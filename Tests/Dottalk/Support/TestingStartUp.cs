@@ -36,8 +36,8 @@ namespace Tests.Hangman.Support
             services.AddHttpContextAccessor()
                 .AddDbContext<DBContext>(options => options.UseNpgsql(Configuration.GetValue<string>("Databases:Postgres:ConnectionString")), ServiceLifetime.Singleton)
                 .AddSingleton(options => ActivatorUtilities.CreateInstance<RedisContext>(options, Configuration))
-                .AddScoped<IChatRoomService, ChatRoomService>()
-                .AddScoped<IUserService, UserService>()
+                .AddSingleton<IChatRoomService, ChatRoomService>()
+                .AddSingleton<IUserService, UserService>()
                 .AddAutoMapper(typeof(Startup))
                 .AddControllers();
 

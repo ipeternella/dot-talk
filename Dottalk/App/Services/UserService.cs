@@ -64,6 +64,8 @@ namespace Dottalk.App.Services
         //   Creates a new user. If the room name is already taken, then it raises an exception.
         public async Task<UserResponseDTO> CreateUser(UserCreationRequestDTO userCreationRequestDTO)
         {
+            _logger.LogInformation("New request for user creation: {userCreationRequestDTO}", userCreationRequestDTO);
+
             var userWithSameName = await _db.Users.Where(user => user.Name == userCreationRequestDTO.Name).FirstOrDefaultAsync();
             if (userWithSameName != null) throw new ObjectAlreadyExistsException("A user with this name already exists.");
 

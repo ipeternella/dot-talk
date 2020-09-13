@@ -1,7 +1,9 @@
+using System;
 using System.Threading.Tasks;
 using Dottalk.App.DTOs;
 using Dottalk.App.Ports;
 using Microsoft.Extensions.DependencyInjection;
+using Tests.Dottalk.Support;
 using Tests.Hangman.Support;
 using Xunit;
 
@@ -33,6 +35,23 @@ namespace Tests.Dottalk.Integration
             Assert.Equal(newChatRoomRequest.Name, serviceResult.Name);
             Assert.Equal(newChatRoomRequest.ActiveConnectionsLimit, serviceResult.ActiveConnectionsLimit);
             Assert.Equal(persistedChatRoom.Id, serviceResult.Id);
+        }
+
+        [Fact(DisplayName = "Chat room service should get a connection pool of a chat room for the first time")]
+        public async Task TestChatRoomShouldGetConnectionPoolOfChatRoomForFirstTime()
+        {
+            // arrange
+            var chatRoomService = ServiceProvider.GetRequiredService<IChatRoomService>();
+            var (chatRoom, _) = TestingScenarioBuilder.BuildScenarioWithChatRoomAndUser("Chat 1", 4, "IGP", DB);
+
+            // act
+            var chatActiveConnectionPool = await chatRoomService.GetOrCreateChatRoomActiveConnectionPool(chatRoom.Name);
+
+            // assert
+            Assert.Equal(chatRoom.Id, chatActiveConnectionPool.ChatRoomId);
+            Assert.Equal(4, chatRoom.ActiveConnectionsLimit);
+            Assert.Equal(0, chatActiveConnectionPool.TotalActiveConnections);  // no connections for the first time
+            Assert.Empty(chatActiveConnectionPool.ServerInstances);
         }
     }
 }

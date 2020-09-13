@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Dottalk.App.Domain.Models;
+using Dottalk.Infra.Persistence;
 
 namespace Tests.Dottalk.Support
 {
@@ -42,6 +43,27 @@ namespace Tests.Dottalk.Support
             };
 
             return chatRoomActiveConnectionPool;
+        }
+
+        public static Tuple<ChatRoom, User> BuildScenarioWithChatRoomAndUser(string chatRoomName,
+            int activeConnectionsLimit, string userName, DBContext db)
+        {
+            var newChatRoom = new ChatRoom
+            {
+                Name = chatRoomName,
+                ActiveConnectionsLimit = activeConnectionsLimit
+            };
+
+            var newUser = new User
+            {
+                Name = userName
+            };
+
+            db.ChatRooms.Add(newChatRoom);
+            db.Users.Add(newUser);
+            db.SaveChanges();
+
+            return new Tuple<ChatRoom, User>(newChatRoom, newUser);
         }
     }
 }
