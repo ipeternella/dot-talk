@@ -59,14 +59,13 @@ namespace Dottalk.App.Services
         public async Task<ChatRoomActiveConnectionPool> GetOrCreateChatRoomActiveConnectionPool(string chatRoomName)
         {
             _logger.LogInformation("Getting connection store for chat room name: {chatRoomName:l}", chatRoomName);
-
             var chatRoom = await GetChatRoom(chatRoomName);
-            if (chatRoom == null) throw new ObjectDoesNotExistException("Chat room does not exist.");
 
+            _logger.LogInformation("Chat room exists, attempting to retrieve a previous connection pool from Redis...");
             var chatRoomActiveConnectionPool = await _redis.GetKey<ChatRoomActiveConnectionPool>(chatRoom.Id);
             if (chatRoomActiveConnectionPool != null) return chatRoomActiveConnectionPool;
 
-            _logger.LogInformation("Chat room had no connection store on Redis. Creating a new one...");
+            _logger.LogInformation("Chat room had no previous connection pool on Redis. Creating a new one...");
             var newChatRoomActiveConnectionPool = new ChatRoomActiveConnectionPool
             {
                 ChatRoomId = chatRoom.Id,
