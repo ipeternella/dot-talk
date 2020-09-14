@@ -13,6 +13,52 @@ namespace Tests.Dottalk.Support
 
         }
 
+        public static ChatRoomActiveConnectionPool BuildChatRoomConnectionPoolEmpty(Guid chatRoomId)
+        {
+            var emptyChatConnectionPool = new ChatRoomActiveConnectionPool()
+            {
+                ChatRoomId = chatRoomId,
+                TotalActiveConnections = 0,  // no users
+                ActiveConnectionsLimit = 6,
+                ServerInstances = new List<ServerInstance>()  // no servers hosting this room
+            };
+
+            return emptyChatConnectionPool;
+        }
+
+        public static ChatRoomActiveConnectionPool BuildChatRoomConnectionPoolTwoInstances(Guid chatRoomId, Guid instanceId1, Guid instanceId2)
+        {
+            var serverInstanceId1 = instanceId1;
+            var serverInstanceId2 = instanceId2;
+
+            var connectedUserId1 = Guid.NewGuid();
+            var connectedUserId2 = Guid.NewGuid();
+            var connectedUserId3 = Guid.NewGuid();
+            var connectedUserId4 = Guid.NewGuid();
+
+            var serverInstance1 = new ServerInstance()
+            {
+                ServerInstanceId = serverInstanceId1,
+                ConnectedUsers = new List<Guid>() { connectedUserId1, connectedUserId2 }
+            };
+
+            var serverInstance2 = new ServerInstance()
+            {
+                ServerInstanceId = serverInstanceId2,
+                ConnectedUsers = new List<Guid>() { connectedUserId3, connectedUserId4 }
+            };
+
+            var chatRoomActiveConnectionPool = new ChatRoomActiveConnectionPool()
+            {
+                ChatRoomId = chatRoomId,
+                TotalActiveConnections = 4,
+                ActiveConnectionsLimit = 6,
+                ServerInstances = new List<ServerInstance>() { serverInstance1, serverInstance2 }
+            };
+
+            return chatRoomActiveConnectionPool;
+        }
+
         public static ChatRoomActiveConnectionPool BuildChatRoomActiveConnectionPoolWithFourUsers()
         {
             var chatRoomId = Guid.NewGuid();
