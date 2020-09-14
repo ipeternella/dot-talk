@@ -19,14 +19,16 @@ namespace Dottalk.App.Services
     //   Chatting usecases/services offered by the application.
     public class ChatRoomService : IChatRoomService
     {
-        // private readonly IChatRoomActiveConnectionPoolRepository _connectionsRepository;
         private readonly ILogger<IChatRoomService> _logger;
+        private readonly IUserService _userService;
         private readonly RedisContext _redis;
         private readonly IMapper _mapper;
         private readonly DBContext _db;
 
-        public ChatRoomService(ILogger<IChatRoomService> logger, DBContext db, IMapper mapper, RedisContext redis)
+        public ChatRoomService(ILogger<IChatRoomService> logger, DBContext db,
+            IMapper mapper, RedisContext redis, IUserService userService)
         {
+            _userService = userService;
             _logger = logger;
             _mapper = mapper;
             _redis = redis;
@@ -54,9 +56,9 @@ namespace Dottalk.App.Services
         }
         // 
         // Summary: 
-        //   Gets a connection store on redis for a give chat room (creates a new one in-memory, if it's the first one).
-        //   ChatRoomActiveConnectionPool
-        public async Task<ChatRoomActiveConnectionPool> GetOrCreateChatRoomActiveConnectionPool(string chatRoomName)
+        //   Gets all the users connected to a given chat room across all application instances hosting such room.
+        //   If the room is not found, it raises an exception.
+        public async Task<ChatRoomActiveConnectionPool> GetChatRoomConnectionPool(string chatRoomName)
         {
             _logger.LogInformation("Getting connection store for chat room name: {chatRoomName:l}", chatRoomName);
             var chatRoom = await GetChatRoom(chatRoomName);
@@ -76,7 +78,23 @@ namespace Dottalk.App.Services
 
             return newChatRoomActiveConnectionPool;
         }
+        //
+        // Summary:
+        //   Connects a user to a given chat room by updating the chat room's active connection pool with the user's
+        //   new connection. If the the user or chat room are not found or if the room is full, it raises an exception.
+        public async Task<ChatRoomActiveConnectionPool> AddUserToChatRoomConnectionPool(string chatRoomName, string userName)
+        {
+            var user = await _userService.GetUser(userName);
+            var chatRoom = await GetChatRoom(chatRoomName);
+            var chatRoomConnectionPool = await GetChatRoomConnectionPool(chatRoomName);
+            var serverInstanceId = GlobalState.ServerInstanceId;
 
+            // domain logic to increment the chat room distributed connections
+            var updatedChatRoomConnectionPool = ChatRoomLogic.IncrementChatRoomConnections(user.Id, serverInstanceId, chatRoomConnectionPool);
+            await _redis.SetKey(chatRoom.Id, updatedChatRoomConnectionPool, null);
+
+            return updatedChatRoomConnectionPool;
+        }
         //
         // Summary:
         //   Gets all chat rooms given the pagination params.

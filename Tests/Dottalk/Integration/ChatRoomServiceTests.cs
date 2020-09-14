@@ -46,7 +46,7 @@ namespace Tests.Dottalk.Integration
             var (chatRoom, _) = TestingScenarioBuilder.BuildScenarioWithChatRoomAndUser("Chat 1", 4, "IGP", DB);
 
             // act
-            var chatActiveConnectionPool = await chatRoomService.GetOrCreateChatRoomActiveConnectionPool(chatRoom.Name);
+            var chatActiveConnectionPool = await chatRoomService.GetChatRoomConnectionPool(chatRoom.Name);
 
             // assert
             Assert.Equal(chatRoom.Id, chatActiveConnectionPool.ChatRoomId);
@@ -64,7 +64,7 @@ namespace Tests.Dottalk.Integration
                 .BuildScenarioWithChatRoomAndUserWithPreviousConnectionPool("Chat 1", 4, "IGP", DB, Redis);
 
             // act
-            var createdChatActiveConnectionPool = await chatRoomService.GetOrCreateChatRoomActiveConnectionPool(chatRoom.Name);
+            var createdChatActiveConnectionPool = await chatRoomService.GetChatRoomConnectionPool(chatRoom.Name);
 
             // assert
             Assert.Equal(chatRoom.Id, createdChatActiveConnectionPool.ChatRoomId);
