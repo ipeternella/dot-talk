@@ -20,7 +20,7 @@ namespace Tests.Dottalk.Unit.Domain
                 .BuildChatRoomConnectionPoolTwoInstances(chatRoomId, instanceId1, instanceId2);
 
             // act: new user that wants to connect to the room being on instance 2
-            var updatedConnectionPool = ChatRoomLogic.IncrementChatRoomConnections(newUserId, instanceId2, initialConnectionPool);  // 4 connections
+            var updatedConnectionPool = ChatRoomLogic.IncrementChatRoomConnectionPool(newUserId, instanceId2, initialConnectionPool);  // 4 connections
 
             // assert
             Assert.Equal(5, updatedConnectionPool.TotalActiveConnections);  // 5 connections after
@@ -37,7 +37,7 @@ namespace Tests.Dottalk.Unit.Domain
             var emptyConnectionPool = TestingScenarioBuilder.BuildChatRoomConnectionPoolEmpty(chatRoomId);
 
             // act: FIRST user wants to connect to the room
-            var updatedConnectionPool = ChatRoomLogic.IncrementChatRoomConnections(firstUserId, instanceId, emptyConnectionPool);  // 0 connections
+            var updatedConnectionPool = ChatRoomLogic.IncrementChatRoomConnectionPool(firstUserId, instanceId, emptyConnectionPool);  // 0 connections
 
             // assert
             Assert.Equal(1, updatedConnectionPool.TotalActiveConnections);  // 1 connection after

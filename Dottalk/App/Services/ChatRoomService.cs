@@ -90,7 +90,7 @@ namespace Dottalk.App.Services
             var serverInstanceId = GlobalState.ServerInstanceId;
 
             // domain logic to increment the chat room distributed connections
-            var updatedChatRoomConnectionPool = ChatRoomLogic.IncrementChatRoomConnections(user.Id, serverInstanceId, chatRoomConnectionPool);
+            var updatedChatRoomConnectionPool = ChatRoomLogic.IncrementChatRoomConnectionPool(user.Id, serverInstanceId, chatRoomConnectionPool);
             await _redis.SetKey(chatRoom.Id, updatedChatRoomConnectionPool, null);
 
             return updatedChatRoomConnectionPool;
