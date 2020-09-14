@@ -13,9 +13,9 @@ namespace Tests.Dottalk.Support
 
         }
 
-        public static ChatRoomActiveConnectionPool BuildChatRoomConnectionPoolEmpty(Guid chatRoomId)
+        public static ChatRoomConnectionPool BuildChatRoomConnectionPoolEmpty(Guid chatRoomId)
         {
-            var emptyChatConnectionPool = new ChatRoomActiveConnectionPool()
+            var emptyChatConnectionPool = new ChatRoomConnectionPool()
             {
                 ChatRoomId = chatRoomId,
                 TotalActiveConnections = 0,  // no users
@@ -26,7 +26,7 @@ namespace Tests.Dottalk.Support
             return emptyChatConnectionPool;
         }
 
-        public static ChatRoomActiveConnectionPool BuildChatRoomConnectionPoolTwoInstances(Guid chatRoomId, Guid instanceId1, Guid instanceId2)
+        public static ChatRoomConnectionPool BuildChatRoomConnectionPoolTwoInstances(Guid chatRoomId, Guid instanceId1, Guid instanceId2)
         {
             var serverInstanceId1 = instanceId1;
             var serverInstanceId2 = instanceId2;
@@ -48,7 +48,7 @@ namespace Tests.Dottalk.Support
                 ConnectedUsers = new List<Guid>() { connectedUserId3, connectedUserId4 }
             };
 
-            var chatRoomActiveConnectionPool = new ChatRoomActiveConnectionPool()
+            var chatRoomActiveConnectionPool = new ChatRoomConnectionPool()
             {
                 ChatRoomId = chatRoomId,
                 TotalActiveConnections = 4,
@@ -59,7 +59,7 @@ namespace Tests.Dottalk.Support
             return chatRoomActiveConnectionPool;
         }
 
-        public static ChatRoomActiveConnectionPool BuildChatRoomActiveConnectionPoolWithFourUsers()
+        public static ChatRoomConnectionPool BuildChatRoomConnectionPoolWithFourUsers()
         {
             var chatRoomId = Guid.NewGuid();
             var serverInstanceId1 = Guid.NewGuid();
@@ -81,7 +81,7 @@ namespace Tests.Dottalk.Support
                 ConnectedUsers = new List<Guid>() { connectedUserId3, connectedUserId4 }
             };
 
-            var chatRoomActiveConnectionPool = new ChatRoomActiveConnectionPool()
+            var chatRoomActiveConnectionPool = new ChatRoomConnectionPool()
             {
                 ChatRoomId = chatRoomId,
                 TotalActiveConnections = 4,
@@ -113,10 +113,10 @@ namespace Tests.Dottalk.Support
             return new Tuple<ChatRoom, User>(newChatRoom, newUser);
         }
 
-        public async static Task<Tuple<ChatRoom, User, ChatRoomActiveConnectionPool>> BuildScenarioWithChatRoomAndUserWithPreviousConnectionPool(string chatRoomName,
+        public async static Task<Tuple<ChatRoom, User, ChatRoomConnectionPool>> BuildScenarioWithChatRoomAndUserWithPreviousConnectionPool(string chatRoomName,
             int activeConnectionsLimit, string userName, DBContext db, RedisContext redis)
         {
-            var chatRoomConnectionPool = BuildChatRoomActiveConnectionPoolWithFourUsers();
+            var chatRoomConnectionPool = BuildChatRoomConnectionPoolWithFourUsers();
             var newChatRoom = new ChatRoom
             {
                 Id = chatRoomConnectionPool.ChatRoomId,
@@ -135,9 +135,9 @@ namespace Tests.Dottalk.Support
             await db.SaveChangesAsync();
 
             // creates a connection pool for the chat room
-            await redis.SetKey<ChatRoomActiveConnectionPool>(chatRoomConnectionPool.ChatRoomId, chatRoomConnectionPool, null);
+            await redis.SetKey<ChatRoomConnectionPool>(chatRoomConnectionPool.ChatRoomId, chatRoomConnectionPool, null);
 
-            return new Tuple<ChatRoom, User, ChatRoomActiveConnectionPool>(newChatRoom, newUser, chatRoomConnectionPool);
+            return new Tuple<ChatRoom, User, ChatRoomConnectionPool>(newChatRoom, newUser, chatRoomConnectionPool);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Tests.Dottalk.Unit
         public async Task TestShouldSaveChatConnectionAndRetrieveFromRedis()
         {
             // arrange
-            var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomActiveConnectionPoolWithFourUsers();
+            var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomConnectionPoolWithFourUsers();
             var chatRoomId = Guid.NewGuid();
             var redis = ServiceProvider.GetRequiredService<RedisContext>();
 
@@ -24,7 +24,7 @@ namespace Tests.Dottalk.Unit
             await redis.SetKey(chatRoomId, chatRoomConnection, TimeSpan.FromMinutes(1));
 
             // assert
-            var persistedChatRoomConnectionPool = await redis.GetKey<ChatRoomActiveConnectionPool>(chatRoomId);
+            var persistedChatRoomConnectionPool = await redis.GetKey<ChatRoomConnectionPool>(chatRoomId);
 
             Assert.Equal(6, persistedChatRoomConnectionPool.ActiveConnectionsLimit);
             Assert.Equal(4, persistedChatRoomConnectionPool.TotalActiveConnections);
@@ -37,15 +37,15 @@ namespace Tests.Dottalk.Unit
         public async Task TestShouldRetunNullFromRedisWhenKeyIsNotFound()
         {
             // arrange
-            var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomActiveConnectionPoolWithFourUsers();
+            var chatRoomConnection = TestingScenarioBuilder.BuildChatRoomConnectionPoolWithFourUsers();
             var redis = ServiceProvider.GetRequiredService<RedisContext>();
 
             // act
             await redis.SetKey("someKey", chatRoomConnection, null);
 
             // assert
-            var nonExistentChatRoom = await redis.GetKey<ChatRoomActiveConnectionPool>("anotherKey");
-            var existentChatRoom = await redis.GetKey<ChatRoomActiveConnectionPool>("someKey");
+            var nonExistentChatRoom = await redis.GetKey<ChatRoomConnectionPool>("anotherKey");
+            var existentChatRoom = await redis.GetKey<ChatRoomConnectionPool>("someKey");
 
             Assert.Null(nonExistentChatRoom);
             Assert.NotNull(existentChatRoom);

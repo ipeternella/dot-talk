@@ -47,7 +47,7 @@ namespace Tests.Dottalk.Unit
                 ConnectedUsers = new List<Guid>() { connectedUserId3, connectedUserId4 }
             };
 
-            var chatRoomConnectionPool = new ChatRoomActiveConnectionPool()
+            var chatRoomConnectionPool = new ChatRoomConnectionPool()
             {
                 ChatRoomId = chatRoomId,
                 TotalActiveConnections = 4,
@@ -99,7 +99,7 @@ namespace Tests.Dottalk.Unit
             }";
 
             // act
-            var deserializedConnectionPool = JsonConvert.DeserializeObject<ChatRoomActiveConnectionPool>(chatRoomConnectionPoolStr);
+            var deserializedConnectionPool = JsonConvert.DeserializeObject<ChatRoomConnectionPool>(chatRoomConnectionPoolStr);
 
             // assert            
             Assert.Equal("6576b56b-8c96-47d0-b17f-70ef3d84bfda", deserializedConnectionPool.ChatRoomId.ToString());

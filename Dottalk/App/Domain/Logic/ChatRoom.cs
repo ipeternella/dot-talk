@@ -9,8 +9,8 @@ namespace Dottalk.App.Domain.Models
     //   All domain/business rules and logic related to chat rooms such as adding new connections, removing, etc.
     public class ChatRoomLogic
     {
-        public static ChatRoomActiveConnectionPool IncrementChatRoomConnections(Guid userId,
-            Guid serverInstanceId, ChatRoomActiveConnectionPool chatRoomConnectionPool)
+        public static ChatRoomConnectionPool IncrementChatRoomConnections(Guid userId,
+            Guid serverInstanceId, ChatRoomConnectionPool chatRoomConnectionPool)
         {
             var serverInstance = chatRoomConnectionPool.ServerInstances
                 .Where(server => server.ServerInstanceId == serverInstanceId)

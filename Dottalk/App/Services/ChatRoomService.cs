@@ -58,17 +58,17 @@ namespace Dottalk.App.Services
         // Summary: 
         //   Gets all the users connected to a given chat room across all application instances hosting such room.
         //   If the room is not found, it raises an exception.
-        public async Task<ChatRoomActiveConnectionPool> GetChatRoomConnectionPool(string chatRoomName)
+        public async Task<ChatRoomConnectionPool> GetChatRoomConnectionPool(string chatRoomName)
         {
             _logger.LogInformation("Getting connection store for chat room name: {chatRoomName:l}", chatRoomName);
             var chatRoom = await GetChatRoom(chatRoomName);
 
             _logger.LogInformation("Chat room exists, attempting to retrieve a previous connection pool from Redis...");
-            var chatRoomActiveConnectionPool = await _redis.GetKey<ChatRoomActiveConnectionPool>(chatRoom.Id);
+            var chatRoomActiveConnectionPool = await _redis.GetKey<ChatRoomConnectionPool>(chatRoom.Id);
             if (chatRoomActiveConnectionPool != null) return chatRoomActiveConnectionPool;
 
             _logger.LogInformation("Chat room had no previous connection pool on Redis. Creating a new one...");
-            var newChatRoomActiveConnectionPool = new ChatRoomActiveConnectionPool
+            var newChatRoomConnectionPool = new ChatRoomConnectionPool
             {
                 ChatRoomId = chatRoom.Id,
                 ActiveConnectionsLimit = chatRoom.ActiveConnectionsLimit,
@@ -76,13 +76,13 @@ namespace Dottalk.App.Services
                 ServerInstances = new List<ServerInstance>()
             };
 
-            return newChatRoomActiveConnectionPool;
+            return newChatRoomConnectionPool;
         }
         //
         // Summary:
         //   Connects a user to a given chat room by updating the chat room's active connection pool with the user's
         //   new connection. If the the user or chat room are not found or if the room is full, it raises an exception.
-        public async Task<ChatRoomActiveConnectionPool> AddUserToChatRoomConnectionPool(string chatRoomName, string userName)
+        public async Task<ChatRoomConnectionPool> AddUserToChatRoomConnectionPool(string chatRoomName, string userName)
         {
             var user = await _userService.GetUser(userName);
             var chatRoom = await GetChatRoom(chatRoomName);

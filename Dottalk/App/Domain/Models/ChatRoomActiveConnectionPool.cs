@@ -26,7 +26,7 @@ namespace Dottalk.App.Domain.Models
     //     "totalActiveConnections": 0,
     //     "serverInstances": []
     //   }
-    public class ChatRoomActiveConnectionPool
+    public class ChatRoomConnectionPool
     {
         public Guid ChatRoomId;
         public int ActiveConnectionsLimit;
