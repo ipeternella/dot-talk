@@ -82,6 +82,13 @@ namespace Dottalk.App.Services
         // Summary:
         //   Connects a user to a given chat room by updating the chat room's active connection pool with the user's
         //   new connection. If the the user or chat room are not found or if the room is full, it raises an exception.
+        //
+        // Returns:
+        //   ChatRoomConnectionPool - an updated chat room connection pool with the users new connection.
+        //
+        // Raises:
+        //   ChatRoomIsFullException - the chat is full (risen by the chat room domain logic)
+        //   ObjectDoesNotExistException - the chat room or the user were not found
         public async Task<ChatRoomConnectionPool> AddUserToChatRoomConnectionPool(string chatRoomName, string userName)
         {
             var user = await _userService.GetUser(userName);

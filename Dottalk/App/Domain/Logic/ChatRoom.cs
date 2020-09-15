@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dottalk.App.Exceptions;
 
 namespace Dottalk.App.Domain.Models
 {
@@ -12,6 +13,9 @@ namespace Dottalk.App.Domain.Models
         public static ChatRoomConnectionPool IncrementChatRoomConnectionPool(Guid userId,
             Guid serverInstanceId, ChatRoomConnectionPool chatRoomConnectionPool)
         {
+            if (chatRoomConnectionPool.ActiveConnectionsLimit == chatRoomConnectionPool.TotalActiveConnections)
+                throw new ChatRoomIsFullException("The chat room is already full.");
+
             var serverInstance = chatRoomConnectionPool.ServerInstances
                 .Where(server => server.ServerInstanceId == serverInstanceId)
                 .FirstOrDefault();

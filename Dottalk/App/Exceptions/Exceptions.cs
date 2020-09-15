@@ -38,4 +38,21 @@ namespace Dottalk.App.Exceptions
         {
         }
     }
+
+    public class ChatRoomIsFullException : Exception
+    {
+        public ChatRoomIsFullException()
+        {
+        }
+
+        public ChatRoomIsFullException(string message)
+            : base(message)
+        {
+        }
+
+        public ChatRoomIsFullException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+    }
 }
