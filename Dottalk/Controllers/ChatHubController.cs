@@ -6,47 +6,50 @@ using Microsoft.Extensions.Logging;
 
 namespace Dottalk.Controllers
 {
+    //
     // Summary:
-    //   Controller/presenter responsible for receiving new connections/disconnections and for processing messages and
+    //   Controller responsible for receiving new connections/disconnections and for processing messages and
     //   commands sent by the users. Based on RPC (remote procedure calls) due to SignalR.
     public class ChatHubController : Hub
     {
         private readonly ILogger<ChatHubController> _logger;
         private readonly IChatRoomService _chatRoomService;
+        private readonly IUserService _userService;
 
-        public ChatHubController(ILogger<ChatHubController> logger, IChatRoomService chatRoomService)
+        public ChatHubController(ILogger<ChatHubController> logger, IChatRoomService chatRoomService, IUserService userService)
         {
             _chatRoomService = chatRoomService;
+            _userService = userService;
             _logger = logger;
         }
-
+        //
         // Summary:
         //   Attempts to accept a new connection for a given chat room. Can fail if the room is full, for example.
-        public async Task JoinRoom(string user, string roomName)
+        public async Task JoinChatRoom(string userName, string chatRoomName)
         {
-            //
-            // Pre-validation steps:
-            //
-            // 1. Check if the room, and the user exists
-            // 2. Check if the room has a connection store on redis, if not: create one for the user that's connecting
-            // 3. Check if the room is not full
-            //
-            // Algorithm:
-            // 3. Update chat room conns on redis            
-            // 4. Save socket in local-memory
-            await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-            await SendMessage(user, $"A new user has joined the room: {user}");
+            _logger.LogInformation("A new user {userName:l} want to join room {chatRoomName:l}", userName, chatRoomName);
+            var chatRoom = await _chatRoomService.GetChatRoom(chatRoomName);
+            var user = await _userService.GetUser(userName);
+
+            _logger.LogInformation("Fetching chat room connection pool to see if it's full...");
+            await _chatRoomService.AddUserToChatRoomConnectionPool(chatRoom.Name, user.Name);
+
+            _logger.LogInformation("Adding user to chat room group...");
+            await Groups.AddToGroupAsync(Context.ConnectionId, chatRoom.Name);
+
+            await BroadcastMessageToChatRoom(chatRoomName, $"A new user has joined the room: {user}");
             await base.OnConnectedAsync();
         }
-
+        //
         // Summary:
         //   Attempts to receive a request to leave room.
-        public async Task LeaveRoom(string roomName)
+        public async Task LeaveChatRoom(string roomName)
         {
+            // TODO: improve chat room connection pool to remove user by his connectionId
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
             await base.OnDisconnectedAsync(null);
         }
-
+        //
         // Summary:
         //   Attempts to remove a connection from the Hub if there's a connection problem from the user.
         public override async Task OnDisconnectedAsync(Exception exception)
@@ -56,13 +59,12 @@ namespace Dottalk.Controllers
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, "SignalR Users");
             await base.OnDisconnectedAsync(exception);
         }
-
+        //
         // Summary:
-        //   Receives messages from users, process them with the chatting services and then returns the processed message
-        //   to the users. Checks for commands, if the command syntax is alright, etc.
-        public async Task SendMessage(string user, string message)
+        //   Broadcasts a message to the whole chat room.
+        public async Task BroadcastMessageToChatRoom(string message, string chatRoomName)
         {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            await Clients.Group(chatRoomName).SendAsync("ReceiveMessage", message);
         }
     }
 }
