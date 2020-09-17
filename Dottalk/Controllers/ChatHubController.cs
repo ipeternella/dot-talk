@@ -37,16 +37,16 @@ namespace Dottalk.Controllers
             _logger.LogInformation("Adding user to chat room group...");
             await Groups.AddToGroupAsync(Context.ConnectionId, chatRoom.Name);
 
-            await BroadcastMessageToChatRoom(chatRoomName, $"A new user has joined the room: {user}");
+            await BroadcastMessageToChatRoom(chatRoomName, $"A new user has joined the room: {user}", userName);
             await base.OnConnectedAsync();
         }
         //
         // Summary:
         //   Attempts to receive a request to leave room.
-        public async Task LeaveChatRoom(string roomName)
+        public async Task LeaveChatRoom(string chatRoomName)
         {
             // TODO: improve chat room connection pool to remove user by his connectionId
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatRoomName);
             await base.OnDisconnectedAsync(null);
         }
         //
@@ -62,7 +62,7 @@ namespace Dottalk.Controllers
         //
         // Summary:
         //   Broadcasts a message to the whole chat room.
-        public async Task BroadcastMessageToChatRoom(string message, string chatRoomName)
+        public async Task BroadcastMessageToChatRoom(string message, string chatRoomName, string userName)
         {
             await Clients.Group(chatRoomName).SendAsync("ReceiveMessage", message);
         }

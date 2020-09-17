@@ -39,6 +39,7 @@ namespace Dottalk
                 .AddControllers();
 
             services.AddSignalR();
+            services.AddRazorPages();
 
             // global json serialization settings
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
@@ -61,6 +62,8 @@ namespace Dottalk
             {
                 app.UseHttpsRedirection();
             }
+
+            app.UseStaticFiles();
             app.UseSerilogRequestLogging();
             app.UseRouting();
             app.UseAuthorization();
@@ -68,6 +71,7 @@ namespace Dottalk
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<ChatHubController>("/chathub");
+                endpoints.MapRazorPages();
             });
 
             Migrate(app, logger, executeSeedDb: env.IsDevelopment());
