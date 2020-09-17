@@ -39,7 +39,20 @@ namespace Dottalk
                 .AddControllers();
 
             services.AddSignalR();
-            services.AddRazorPages();
+
+            // cors settings
+            services.AddCors(options =>
+            {
+                options.AddPolicy(
+                    name: "DevelopmentCORS",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:5000")
+                        .AllowAnyHeader()
+                        .WithMethods("GET", "POST")
+                        .AllowCredentials();
+                    });
+            });
 
             // global json serialization settings
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
@@ -57,6 +70,7 @@ namespace Dottalk
             if (!env.IsProduction())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseCors("DevelopmentCORS");
             }
             else
             {
@@ -71,7 +85,6 @@ namespace Dottalk
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<ChatHubController>("/chathub");
-                endpoints.MapRazorPages();
             });
 
             Migrate(app, logger, executeSeedDb: env.IsDevelopment());
