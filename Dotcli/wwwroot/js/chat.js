@@ -11,16 +11,17 @@ const connection = new signalR.HubConnectionBuilder()
     .build();
 
 connection.on("Send", function (message) {
-    var li = document.createElement("li");
-    li.textContent = message;
-    document.getElementById("messagesList").appendChild(li);
+    var newChatMessageLi = document.createElement("li");
+    newChatMessageLi.textContent = message;
+    document.getElementById("chat-messages-list").appendChild(newChatMessageLi);
 });
 
-document.getElementById("groupmsg").addEventListener("click", async (event) => {
-    var groupName = document.getElementById("group-name").value;
-    var groupMsg = document.getElementById("group-message-text").value;
+document.getElementById("chat-message-submit").addEventListener("click", async (event) => {
+    var chatRoomName = document.getElementById("chat-message-input").value;
+    var chatMessage = document.getElementById("chat-message-input").value;
+
     try {
-        await connection.invoke(RPC_SEND_MESSAGE_TO_CHAT_ROOM, groupMsg, groupName, "igp");
+        await connection.invoke(RPC_SEND_MESSAGE_TO_CHAT_ROOM, chatMessage, chatRoomName, "igp");
     }
     catch (e) {
         console.error(e.toString());
@@ -28,25 +29,29 @@ document.getElementById("groupmsg").addEventListener("click", async (event) => {
     event.preventDefault();
 });
 
-document.getElementById("join-group").addEventListener("click", async (event) => {
-    var groupName = document.getElementById("group-name").value;
+document.getElementById("join-chat-room").addEventListener("click", async (event) => {
+    var chatRoomName = document.getElementById("chat-room-name").value;
+
     try {
-        await connection.invoke(RPC_JOIN_CHAT_ROOM, "igp", groupName);
+        await connection.invoke(RPC_JOIN_CHAT_ROOM, "igp", chatRoomName);
     }
     catch (e) {
         console.error(e.toString());
     }
+
     event.preventDefault();
 });
 
-document.getElementById("leave-group").addEventListener("click", async (event) => {
-    var groupName = document.getElementById("group-name").value;
+document.getElementById("leave-chat-room").addEventListener("click", async (event) => {
+    var chatRoomName = document.getElementById("chat-room-name").value;
+
     try {
-        await connection.invoke(RPC_LEAVE_CHAT_ROOM, "igp", groupName);
+        await connection.invoke(RPC_LEAVE_CHAT_ROOM, "igp", chatRoomName);
     }
     catch (e) {
         console.error(e.toString());
     }
+
     event.preventDefault();
 });
 

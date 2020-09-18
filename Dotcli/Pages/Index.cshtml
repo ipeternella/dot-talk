@@ -3,62 +3,32 @@
     ViewData["Title"] = "💬 Dot Chat 💬";
 }
 
-@* <div class="container">
-    <div class="row">&nbsp;</div>
-    <div class="row">
-        <div class="col-6">&nbsp;</div>
-        <div class="col-6">
-            <form class="form-inline">
-                <div class="input-prepend input-append">
-                    <input type="text" name="group-message" id="group-message-text" placeholder="Type message here!" />
-                    <input type="text" name="group-name" id="group-name" placeholder="Chat Room Name" />
-                    <input type="button" id="groupmsg" class="btn" value="Send to Room" />
-                    <input type="button" id="join-group" class="btn" value="Join Chat Room" />
-                    <input type="button" id="leave-group" class="btn" value="Leave Chat Room" />
-                </div>
-            </form>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-12">
-            <hr />
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-6">&nbsp;</div>
-        <div class="col-6">
-            <ul id="messagesList"></ul>
-        </div>
-    </div>
-</div> *@
-
-@* <div class="row">
-    <div class="col-8 chat-title">Django Chat!</div>
-</div> *@
-
 <div class="container align-items-center">
     <div id="user-and-chat-name-area" class="row text-center">
         <div class="col-6">
             <h3 id="user-and-chat-area">User Name</h3>
-            <input type="text" name="group-message" id="group-message-text" placeholder="User Name" />              
+            <input id="user-na,e" type="text" name="user-name" placeholder="User Name" />              
         </div>    
 
         <div class="col-6">
             <h3 id="user-and-chat-area">Chat Room</h3>
-            <input type="text" name="group-name" id="group-name" placeholder="Chat Room" />
-            <input type="button" id="groupmsg" class="btn" value="Join Room!" />
-            <input type="button" id="leave-group" class="btn" value="Leave Room!" />
+            <input type="text" id="chat-room-name" placeholder="Chat Room" />
+            <input type="button" id="join-chat-room" class="btn" value="Join Room!" />
+            <input type="button" id="leave-chat-room" class="btn" value="Leave Room!" />
         </div>    
     </div>
 
     <div class="row">
         <div class="col-12 text-center chat-area">
-            <textarea id="chat-log" readonly></textarea><br/>
+            <div class="chat-log">
+                <ul id="chat-messages-list"></ul>
+            </div>            
         </div>
+
         <div class="col-12 chat-area">
             <h2>Message</h2>
-            <input id="chat-message-input" type="text" size="50"/><br/>
-            <input id="chat-message-submit" type="button" value="Send" class="btn"/>
+            <input id="chat-message-input" type="text" size="50"/><br/> <!-- group-message-text -->
+            <input id="chat-message-submit" type="button" value="Send" class="btn"/> <!-- groupmsg -->
         </div>
     </div>    
 </div>
