@@ -29,8 +29,22 @@ namespace Tests.Dottalk.Unit
             Assert.Equal(6, persistedChatRoomConnectionPool.ActiveConnectionsLimit);
             Assert.Equal(4, persistedChatRoomConnectionPool.TotalActiveConnections);
             Assert.Equal(2, persistedChatRoomConnectionPool.ServerInstances.Count());
+
+            // first server instance
+            Assert.Equal(chatRoomConnection.ServerInstances.ElementAt(0).ServerInstanceId.ToString(),
+                persistedChatRoomConnectionPool.ServerInstances.ElementAt(0).ServerInstanceId.ToString());
+            Assert.Equal(chatRoomConnection.ServerInstances.ElementAt(0).ConnectedUsers.First().UserId,
+                persistedChatRoomConnectionPool.ServerInstances.ElementAt(0).ConnectedUsers.First().UserId);
+            Assert.Equal("connection 1", chatRoomConnection.ServerInstances.ElementAt(0).ConnectedUsers.First().ConnectionId);
+            Assert.Equal("connection 2", chatRoomConnection.ServerInstances.ElementAt(0).ConnectedUsers.ElementAt(1).ConnectionId);
+
+            // second server instance hosting the chat room
             Assert.Equal(chatRoomConnection.ServerInstances.ElementAt(1).ServerInstanceId.ToString(),
                 persistedChatRoomConnectionPool.ServerInstances.ElementAt(1).ServerInstanceId.ToString());
+            Assert.Equal(chatRoomConnection.ServerInstances.ElementAt(1).ConnectedUsers.First().UserId,
+                persistedChatRoomConnectionPool.ServerInstances.ElementAt(1).ConnectedUsers.First().UserId);
+            Assert.Equal("connection 3", chatRoomConnection.ServerInstances.ElementAt(1).ConnectedUsers.First().ConnectionId);
+            Assert.Equal("connection 4", chatRoomConnection.ServerInstances.ElementAt(1).ConnectedUsers.ElementAt(1).ConnectionId);
         }
 
         [Fact(DisplayName = "Should return a null value from Redis when the key is not found")]

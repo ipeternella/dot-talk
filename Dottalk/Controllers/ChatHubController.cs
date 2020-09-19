@@ -30,14 +30,15 @@ namespace Dottalk.Controllers
             _logger.LogInformation("A new user {userName:l} want to join room {chatRoomName:l}", userName, chatRoomName);
             var chatRoom = await _chatRoomService.GetChatRoom(chatRoomName);
             var user = await _userService.GetUser(userName);
+            var userConnectionId = Context.ConnectionId;
 
             _logger.LogInformation("Fetching chat room connection pool to see if it's full...");
-            await _chatRoomService.AddUserToChatRoomConnectionPool(chatRoom.Name, user.Name);
+            await _chatRoomService.AddUserToChatRoomConnectionPool(chatRoom.Name, user.Name, userConnectionId);
 
             _logger.LogInformation("Adding user to chat room group...");
             await Groups.AddToGroupAsync(Context.ConnectionId, chatRoom.Name);
 
-            await BroadcastMessageToChatRoom(chatRoomName, $"A new user has joined the room: {user}", userName);
+            await BroadcastMessageToChatRoom(chatRoomName, $"A new user has joined the room: {user}");
             await base.OnConnectedAsync();
         }
         //
@@ -62,7 +63,7 @@ namespace Dottalk.Controllers
         //
         // Summary:
         //   Broadcasts a message to the whole chat room.
-        public async Task BroadcastMessageToChatRoom(string message, string chatRoomName, string userName)
+        public async Task BroadcastMessageToChatRoom(string message, string chatRoomName)
         {
             await Clients.Group(chatRoomName).SendAsync("ReceiveMessage", message);
         }

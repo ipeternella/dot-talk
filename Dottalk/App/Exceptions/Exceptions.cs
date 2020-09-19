@@ -55,4 +55,21 @@ namespace Dottalk.App.Exceptions
         {
         }
     }
+
+    public class UserIsAlreadyConnectedException : Exception
+    {
+        public UserIsAlreadyConnectedException()
+        {
+        }
+
+        public UserIsAlreadyConnectedException(string message)
+            : base(message)
+        {
+        }
+
+        public UserIsAlreadyConnectedException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+    }
 }

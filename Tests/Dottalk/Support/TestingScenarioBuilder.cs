@@ -26,70 +26,68 @@ namespace Tests.Dottalk.Support
             return emptyChatConnectionPool;
         }
 
-        public static ChatRoomConnectionPool BuildChatRoomConnectionPoolTwoInstances(Guid chatRoomId, Guid instanceId1, Guid instanceId2)
+        public static ChatRoomConnectionPool BuildChatRoomConnectionPoolTwoInstances(Guid chatRoomId, int activeConnectionsLimit, Guid instanceId1, Guid instanceId2)
         {
-            var serverInstanceId1 = instanceId1;
-            var serverInstanceId2 = instanceId2;
-
             var connectedUserId1 = Guid.NewGuid();
             var connectedUserId2 = Guid.NewGuid();
             var connectedUserId3 = Guid.NewGuid();
             var connectedUserId4 = Guid.NewGuid();
 
+            var connectedUser1 = new ConnectedUser
+            {
+                UserId = connectedUserId1,
+                ConnectionId = "connection 1"
+            };
+
+            var connectedUser2 = new ConnectedUser
+            {
+                UserId = connectedUserId2,
+                ConnectionId = "connection 2"
+            };
+
+            var connectedUser3 = new ConnectedUser
+            {
+                UserId = connectedUserId3,
+                ConnectionId = "connection 3"
+            };
+
+            var connectedUser4 = new ConnectedUser
+            {
+                UserId = connectedUserId4,
+                ConnectionId = "connection 4"
+            };
+
             var serverInstance1 = new ServerInstance()
             {
-                ServerInstanceId = serverInstanceId1,
-                ConnectedUsers = new List<Guid>() { connectedUserId1, connectedUserId2 }
+                ServerInstanceId = instanceId1,
+                ConnectedUsers = new List<ConnectedUser>() { connectedUser1, connectedUser2 }
             };
 
             var serverInstance2 = new ServerInstance()
             {
-                ServerInstanceId = serverInstanceId2,
-                ConnectedUsers = new List<Guid>() { connectedUserId3, connectedUserId4 }
+                ServerInstanceId = instanceId2,
+                ConnectedUsers = new List<ConnectedUser>() { connectedUser3, connectedUser4 }
             };
 
-            var chatRoomActiveConnectionPool = new ChatRoomConnectionPool()
+            var chatRoomConnectionPool = new ChatRoomConnectionPool()
             {
                 ChatRoomId = chatRoomId,
+                ActiveConnectionsLimit = activeConnectionsLimit,
                 TotalActiveConnections = 4,
-                ActiveConnectionsLimit = 6,
                 ServerInstances = new List<ServerInstance>() { serverInstance1, serverInstance2 }
             };
 
-            return chatRoomActiveConnectionPool;
+            return chatRoomConnectionPool;
         }
 
         public static ChatRoomConnectionPool BuildChatRoomConnectionPoolWithFourUsers()
         {
             var chatRoomId = Guid.NewGuid();
-            var serverInstanceId1 = Guid.NewGuid();
-            var serverInstanceId2 = Guid.NewGuid();
-            var connectedUserId1 = Guid.NewGuid();
-            var connectedUserId2 = Guid.NewGuid();
-            var connectedUserId3 = Guid.NewGuid();
-            var connectedUserId4 = Guid.NewGuid();
+            var instanceId1 = Guid.NewGuid();
+            var instanceId2 = Guid.NewGuid();
+            var activeConnectionsLimit = 6;
 
-            var serverInstance1 = new ServerInstance()
-            {
-                ServerInstanceId = serverInstanceId1,
-                ConnectedUsers = new List<Guid>() { connectedUserId1, connectedUserId2 }
-            };
-
-            var serverInstance2 = new ServerInstance()
-            {
-                ServerInstanceId = serverInstanceId2,
-                ConnectedUsers = new List<Guid>() { connectedUserId3, connectedUserId4 }
-            };
-
-            var chatRoomActiveConnectionPool = new ChatRoomConnectionPool()
-            {
-                ChatRoomId = chatRoomId,
-                TotalActiveConnections = 4,
-                ActiveConnectionsLimit = 6,
-                ServerInstances = new List<ServerInstance>() { serverInstance1, serverInstance2 }
-            };
-
-            return chatRoomActiveConnectionPool;
+            return BuildChatRoomConnectionPoolTwoInstances(chatRoomId, activeConnectionsLimit, instanceId1, instanceId2);
         }
 
         public static Tuple<ChatRoom, User> BuildScenarioWithChatRoomAndUser(string chatRoomName,
@@ -135,7 +133,7 @@ namespace Tests.Dottalk.Support
             await db.SaveChangesAsync();
 
             // creates a connection pool for the chat room
-            await redis.SetKey<ChatRoomConnectionPool>(chatRoomConnectionPool.ChatRoomId, chatRoomConnectionPool, null);
+            await redis.SetKey(chatRoomConnectionPool.ChatRoomId, chatRoomConnectionPool, null);
 
             return new Tuple<ChatRoom, User, ChatRoomConnectionPool>(newChatRoom, newUser, chatRoomConnectionPool);
         }

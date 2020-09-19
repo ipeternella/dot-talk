@@ -89,7 +89,7 @@ namespace Dottalk.App.Services
         // Raises:
         //   ChatRoomIsFullException - the chat is full (risen by the chat room domain logic)
         //   ObjectDoesNotExistException - the chat room or the user were not found
-        public async Task<ChatRoomConnectionPool> AddUserToChatRoomConnectionPool(string chatRoomName, string userName)
+        public async Task<ChatRoomConnectionPool> AddUserToChatRoomConnectionPool(string chatRoomName, string userName, string connectionId)
         {
             var user = await _userService.GetUser(userName);
             var chatRoom = await GetChatRoom(chatRoomName);
@@ -97,7 +97,7 @@ namespace Dottalk.App.Services
             var serverInstanceId = GlobalState.ServerInstanceId;
 
             // domain logic to increment the chat room distributed connections
-            var updatedChatRoomConnectionPool = ChatRoomLogic.IncrementChatRoomConnectionPool(user.Id, serverInstanceId, chatRoomConnectionPool);
+            var updatedChatRoomConnectionPool = ChatRoomLogic.IncrementChatRoomConnectionPool(user.Id, serverInstanceId, connectionId, chatRoomConnectionPool);
             await _redis.SetKey(chatRoom.Id, updatedChatRoomConnectionPool, null);
 
             return updatedChatRoomConnectionPool;

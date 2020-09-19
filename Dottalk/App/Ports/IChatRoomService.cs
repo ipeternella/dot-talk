@@ -17,6 +17,6 @@ namespace Dottalk.App.Ports
         Task<IEnumerable<ChatRoomResponseDTO>> GetAllChatRooms(PaginationParams? paginationParams);
         Task<ChatRoomResponseDTO> CreateChatRoom(ChatRoomCreationRequestDTO chatRoomCreationRequestDTO);
         Task<ChatRoomConnectionPool> GetChatRoomConnectionPool(string chatRoomName);
-        Task<ChatRoomConnectionPool> AddUserToChatRoomConnectionPool(string chatRoomName, string userName);
+        Task<ChatRoomConnectionPool> AddUserToChatRoomConnectionPool(string chatRoomName, string userName, string connectionId);
     }
 }
