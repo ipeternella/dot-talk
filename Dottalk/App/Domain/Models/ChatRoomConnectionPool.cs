@@ -9,6 +9,7 @@ namespace Dottalk.App.Domain.Models
     //   application instance).
     //
     // Expected serialization:
+    //
     // {
     //     "chatRoomId": "6576b56b-8c96-47d0-b17f-70ef3d84bfda",
     //     "activeConnectionsLimit": 6,
@@ -48,12 +49,14 @@ namespace Dottalk.App.Domain.Models
     // }
     //
     // Expected serialization (new chat room):
-    //   {
+    //
+    // {
     //     "chatRoomId": "6576b56b-8c96-47d0-b17f-70ef3d84bfda",
     //     "activeConnectionsLimit": 6,
     //     "totalActiveConnections": 0,
     //     "serverInstances": []
-    //   }
+    // }
+    //
     public class ChatRoomConnectionPool
     {
         public Guid ChatRoomId;

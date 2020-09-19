@@ -40,7 +40,7 @@ namespace Dottalk.App.Services
         public async Task<ChatRoomResponseDTO> GetChatRoom(Guid chatRoomId)
         {
             var chatRoom = await _db.ChatRooms.FindAsync(chatRoomId);
-            if (chatRoom == null) throw new ObjectDoesNotExistException("Chat room does not exist.");
+            if (chatRoom == null) throw new ObjectDoesNotExistException("Chat room does not exist!");
 
             return _mapper.Map<ChatRoom, ChatRoomResponseDTO>(chatRoom);
         }
@@ -50,7 +50,7 @@ namespace Dottalk.App.Services
         public async Task<ChatRoomResponseDTO> GetChatRoom(string chatRoomName)
         {
             var chatRoom = await _db.ChatRooms.Where(room => room.Name == chatRoomName).FirstOrDefaultAsync();
-            if (chatRoom == null) throw new ObjectDoesNotExistException("Chat room does not exist.");
+            if (chatRoom == null) throw new ObjectDoesNotExistException("Chat room does not exist!");
 
             return _mapper.Map<ChatRoom, ChatRoomResponseDTO>(chatRoom);
         }
@@ -89,16 +89,41 @@ namespace Dottalk.App.Services
         // Raises:
         //   ChatRoomIsFullException - the chat is full (risen by the chat room domain logic)
         //   ObjectDoesNotExistException - the chat room or the user were not found
+        //   UserIsAlreadyConnectedException - the user is attempting to connect to a chat room in which he's already connected
         public async Task<ChatRoomConnectionPool> AddUserToChatRoomConnectionPool(string chatRoomName, string userName, string connectionId)
         {
-            var user = await _userService.GetUser(userName);
-            var chatRoom = await GetChatRoom(chatRoomName);
             var chatRoomConnectionPool = await GetChatRoomConnectionPool(chatRoomName);
+            var user = await _userService.GetUser(userName);
+
+            var chatRoomId = chatRoomConnectionPool.ChatRoomId;
             var serverInstanceId = GlobalState.ServerInstanceId;
 
             // domain logic to increment the chat room distributed connections
             var updatedChatRoomConnectionPool = ChatRoomLogic.IncrementChatRoomConnectionPool(user.Id, serverInstanceId, connectionId, chatRoomConnectionPool);
-            await _redis.SetKey(chatRoom.Id, updatedChatRoomConnectionPool, null);
+            await _redis.SetKey(chatRoomId, updatedChatRoomConnectionPool, null);
+
+            return updatedChatRoomConnectionPool;
+        }
+        //
+        // Summary:
+        //   Removes a user from a given chat room by updating the chat room's active connection pool with the user'. 
+        //   If the the user or chat room are not found or if the room is full, it raises an exception.
+        //
+        // Returns:
+        //   ChatRoomConnectionPool - an updated chat room connection pool without the user connection.
+        //
+        // Raises:
+        //   ChatRoomIsFullException - the chat is full (risen by the chat room domain logic)
+        //   ObjectDoesNotExistException - the chat room or the user were not found
+        //   UserIsAlreadyConnectedException - the user is attempting to connect to a chat room in which he's already connected
+        public async Task<ChatRoomConnectionPool> RemoveUserFromChatRoomConnectionPool(string chatRoomName, string connectionId)
+        {
+            var chatRoomConnectionPool = await GetChatRoomConnectionPool(chatRoomName);
+            var chatRoomId = chatRoomConnectionPool.ChatRoomId;
+            var serverInstanceId = GlobalState.ServerInstanceId;
+
+            var updatedChatRoomConnectionPool = ChatRoomLogic.DecrementChatRoomConnectionPool(serverInstanceId, connectionId, chatRoomConnectionPool);
+            await _redis.SetKey(chatRoomId, updatedChatRoomConnectionPool, null);
 
             return updatedChatRoomConnectionPool;
         }
@@ -118,7 +143,7 @@ namespace Dottalk.App.Services
         public async Task<ChatRoomResponseDTO> CreateChatRoom(ChatRoomCreationRequestDTO chatRoomCreationRequestDTO)
         {
             var roomWithSameName = await _db.ChatRooms.Where(room => room.Name == chatRoomCreationRequestDTO.Name).FirstOrDefaultAsync();
-            if (roomWithSameName != null) throw new ObjectAlreadyExistsException("A chat room with this name already exists.");
+            if (roomWithSameName != null) throw new ObjectAlreadyExistsException("A chat room with this name already exists!");
 
             var newChatRoom = _mapper.Map<ChatRoomCreationRequestDTO, ChatRoom>(chatRoomCreationRequestDTO);
 

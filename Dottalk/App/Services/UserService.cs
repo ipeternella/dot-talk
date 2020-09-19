@@ -35,7 +35,7 @@ namespace Dottalk.App.Services
         public async Task<UserResponseDTO> GetUser(Guid userId)
         {
             var user = await _db.Users.FindAsync(userId);
-            if (user == null) throw new ObjectDoesNotExistException("User does not exist.");
+            if (user == null) throw new ObjectDoesNotExistException("User does not exist!");
 
             return _mapper.Map<User, UserResponseDTO>(user);
         }
@@ -45,7 +45,7 @@ namespace Dottalk.App.Services
         public async Task<UserResponseDTO> GetUser(string userName)
         {
             var user = await _db.Users.Where(user => user.Name == userName).FirstOrDefaultAsync();
-            if (user == null) throw new ObjectDoesNotExistException("User does not exist.");
+            if (user == null) throw new ObjectDoesNotExistException("User does not exist!");
 
             return _mapper.Map<User, UserResponseDTO>(user);
         }
@@ -67,7 +67,7 @@ namespace Dottalk.App.Services
             _logger.LogInformation("New request for user creation: {userCreationRequestDTO}", userCreationRequestDTO);
 
             var userWithSameName = await _db.Users.Where(user => user.Name == userCreationRequestDTO.Name).FirstOrDefaultAsync();
-            if (userWithSameName != null) throw new ObjectAlreadyExistsException("A user with this name already exists.");
+            if (userWithSameName != null) throw new ObjectAlreadyExistsException("A user with this name already exists!");
 
             var newUser = _mapper.Map<UserCreationRequestDTO, User>(userCreationRequestDTO);
 

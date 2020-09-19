@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Dottalk.App.Exceptions;
 using Dottalk.App.Ports;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -27,18 +28,26 @@ namespace Dottalk.Controllers
         //   Attempts to accept a new connection for a given chat room. Can fail if the room is full, for example.
         public async Task JoinChatRoom(string userName, string chatRoomName)
         {
-            _logger.LogInformation("A new user {userName:l} want to join room {chatRoomName:l}", userName, chatRoomName);
-            var chatRoom = await _chatRoomService.GetChatRoom(chatRoomName);
-            var user = await _userService.GetUser(userName);
             var userConnectionId = Context.ConnectionId;
+            _logger.LogInformation("A new user {userName:l} want to join room {chatRoomName:l} with connection id: {userConnectionId:l}",
+                userName, chatRoomName, userConnectionId);
 
-            _logger.LogInformation("Fetching chat room connection pool to see if it's full...");
-            await _chatRoomService.AddUserToChatRoomConnectionPool(chatRoom.Name, user.Name, userConnectionId);
+            try
+            {
+                _logger.LogInformation("Fetching chat room connection pool to see if it's full...");
+                await _chatRoomService.AddUserToChatRoomConnectionPool(chatRoomName, userName, userConnectionId);
+            }
+            catch (Exception e) when
+                (e is ObjectDoesNotExistException || e is ChatRoomIsFullException || e is UserIsAlreadyConnectedException)
+            {
+                throw new HubException(e.Message); // TODO: improve safety of the exception message with specific handler
+            }
 
             _logger.LogInformation("Adding user to chat room group...");
-            await Groups.AddToGroupAsync(Context.ConnectionId, chatRoom.Name);
+            await Groups.AddToGroupAsync(Context.ConnectionId, chatRoomName);
 
-            await BroadcastMessageToChatRoom(chatRoomName, $"A new user has joined the room: {user}");
+            _logger.LogInformation("Broadcasting new user in room message...");
+            await BroadcastMessageToChatRoom(chatRoomName, $"A new user has joined the room: {userName}");
             await base.OnConnectedAsync();
         }
         //
@@ -46,8 +55,23 @@ namespace Dottalk.Controllers
         //   Attempts to receive a request to leave room.
         public async Task LeaveChatRoom(string chatRoomName)
         {
-            // TODO: improve chat room connection pool to remove user by his connectionId
+            var userConnectionId = Context.ConnectionId;
+            _logger.LogInformation("User with connection {userConnectionId:l} want leave room {chatRoomName:l}", userConnectionId, chatRoomName);
+
+            try
+            {
+                _logger.LogInformation("Removing user connection from redis connection pool...");
+                await _chatRoomService.RemoveUserFromChatRoomConnectionPool(chatRoomName, userConnectionId);
+            }
+            catch (Exception e) when
+                (e is ObjectDoesNotExistException || e is ChatRoomIsFullException || e is UserIsAlreadyConnectedException)
+            {
+                throw new HubException(e.Message); // TODO: improve safety of the exception message with specific handler
+            }
+
+            _logger.LogInformation("Removing user connection from in-memory connection pool.");
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatRoomName);
+
             await base.OnDisconnectedAsync(null);
         }
         //
