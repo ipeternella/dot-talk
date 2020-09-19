@@ -6,9 +6,6 @@ const RPC_JOIN_CHAT_ROOM = "JoinChatRoom";
 const RPC_LEAVE_CHAT_ROOM = "LeaveChatRoom";
 const RPC_SEND_MESSAGE_TO_CHAT_ROOM = "BroadcastMessageToChatRoom";
 
-// global variable -> only set when the user joins a room
-var userName = null;
-
 const connection = new signalR.HubConnectionBuilder()
     .withUrl(CHAT_HUB_ENDPOINT)
     .build();
@@ -83,10 +80,10 @@ document.getElementById("join-chat-room").addEventListener("click", async (event
 
 document.getElementById("leave-chat-room").addEventListener("click", async (event) => {
     var chatRoomName = document.getElementById("chat-room-name").value;
-    userName = null;
+    userName = document.getElementById("user-name").value;
 
     try {
-        await connection.invoke(RPC_LEAVE_CHAT_ROOM, chatRoomName);
+        await connection.invoke(RPC_LEAVE_CHAT_ROOM, chatRoomName, userName);
         writeServerMessageForSomeTime(`Successfully left the chat room ${chatRoomName}`);
     }
     catch (e) {

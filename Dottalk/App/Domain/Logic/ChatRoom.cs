@@ -12,7 +12,34 @@ namespace Dottalk.App.Domain.Models
     {
         //
         //  Summary:
-        //    Decrements a chat room's connection pool on Redis.
+        //    Decrements a chat room's connection pool on Redis based on a user id.
+        //
+        //  Exceptions
+        //    UserIsNotConnectedException - raised if the user connection was not found.
+        public static ChatRoomConnectionPool DecrementChatRoomConnectionPool(Guid serverInstanceId,
+            Guid userId, ChatRoomConnectionPool chatRoomConnectionPool)
+        {
+            var serverInstance = chatRoomConnectionPool.ServerInstances
+                .Where(server => server.ServerInstanceId == serverInstanceId)
+                .FirstOrDefault();
+            var connectedUser = serverInstance?.ConnectedUsers.Where(conn => conn.UserId == userId);
+
+            // makes sure a server instance exists and that the connectionId exists
+            if (serverInstance == null || connectedUser.Count() == 0)
+                throw new ObjectDoesNotExistException("User was not found in the room! Maybe he has left already?");
+
+            // updated list with the removed connection
+            var updatedConnections = serverInstance.ConnectedUsers.ToList();
+            updatedConnections.RemoveAll(conn => conn.UserId == userId);
+
+            serverInstance.ConnectedUsers = updatedConnections;
+            chatRoomConnectionPool.TotalActiveConnections -= 1;
+
+            return chatRoomConnectionPool;
+        }
+        //
+        //  Summary:
+        //    Decrements a chat room's connection pool on Redis based on a connection id.
         //
         //  Exceptions
         //    UserIsNotConnectedException - raised if the user connection was not found.
@@ -25,7 +52,7 @@ namespace Dottalk.App.Domain.Models
             var connectedUser = serverInstance?.ConnectedUsers.Where(conn => conn.ConnectionId == connectionId);
 
             // makes sure a server instance exists and that the connectionId exists
-            if (serverInstance == null || connectedUser == null)
+            if (serverInstance == null || connectedUser.Count() == 0)
                 throw new ObjectDoesNotExistException("User was not found in the room! Maybe he has left already?");
 
             // updated list with the removed connection
@@ -72,6 +99,19 @@ namespace Dottalk.App.Domain.Models
 
             chatRoomConnectionPool.TotalActiveConnections += 1;
             return chatRoomConnectionPool;
+        }
+
+        public static string GetConnectionIdFromChatRoomConnectionPool(Guid userId, ChatRoomConnectionPool chatRoomConnection)
+        {
+            foreach (var server in chatRoomConnection.ServerInstances)
+            {
+                var connectedUser = server.ConnectedUsers.Where(conn => conn.UserId == userId).FirstOrDefault();
+
+                if (connectedUser != null) return connectedUser.ConnectionId;
+            }
+
+            // given user id was not found!
+            throw new ObjectDoesNotExistException("User was not found in the room!");
         }
 
         private static IEnumerable<ServerInstance> CreateFirstServerInstance(Guid userId, Guid serverInstanceId, string connectionId)

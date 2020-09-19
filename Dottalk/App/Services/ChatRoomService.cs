@@ -106,8 +106,7 @@ namespace Dottalk.App.Services
         }
         //
         // Summary:
-        //   Removes a user from a given chat room by updating the chat room's active connection pool with the user'. 
-        //   If the the user or chat room are not found or if the room is full, it raises an exception.
+        //   Removes a connection id from a given chat room by updating the chat room's active connection pool.
         //
         // Returns:
         //   ChatRoomConnectionPool - an updated chat room connection pool without the user connection.
@@ -116,7 +115,7 @@ namespace Dottalk.App.Services
         //   ChatRoomIsFullException - the chat is full (risen by the chat room domain logic)
         //   ObjectDoesNotExistException - the chat room or the user were not found
         //   UserIsAlreadyConnectedException - the user is attempting to connect to a chat room in which he's already connected
-        public async Task<ChatRoomConnectionPool> RemoveUserFromChatRoomConnectionPool(string chatRoomName, string connectionId)
+        public async Task<Tuple<ChatRoomConnectionPool, string>> RemoveConnectionFromChatRoomConnectionPool(string chatRoomName, string connectionId)
         {
             var chatRoomConnectionPool = await GetChatRoomConnectionPool(chatRoomName);
             var chatRoomId = chatRoomConnectionPool.ChatRoomId;
@@ -125,7 +124,32 @@ namespace Dottalk.App.Services
             var updatedChatRoomConnectionPool = ChatRoomLogic.DecrementChatRoomConnectionPool(serverInstanceId, connectionId, chatRoomConnectionPool);
             await _redis.SetKey(chatRoomId, updatedChatRoomConnectionPool, null);
 
-            return updatedChatRoomConnectionPool;
+            return new Tuple<ChatRoomConnectionPool, string>(updatedChatRoomConnectionPool, connectionId);
+        }
+        //
+        // Summary:
+        //   Removes a username id from a given chat room by updating the chat room's active connection pool.
+        //
+        // Returns:
+        //   ChatRoomConnectionPool - an updated chat room connection pool without the user connection.
+        //
+        // Raises:
+        //   ChatRoomIsFullException - the chat is full (risen by the chat room domain logic)
+        //   ObjectDoesNotExistException - the chat room or the user were not found
+        //   UserIsAlreadyConnectedException - the user is attempting to connect to a chat room in which he's already connected
+        public async Task<Tuple<ChatRoomConnectionPool, string>> RemoveUserFromChatRoomConnectionPool(string chatRoomName, string userName)
+        {
+            var chatRoomConnectionPool = await GetChatRoomConnectionPool(chatRoomName);
+            var user = await _userService.GetUser(userName);
+            var chatRoomId = chatRoomConnectionPool.ChatRoomId;
+            var serverInstanceId = GlobalState.ServerInstanceId;
+
+            var removedConnectionId = ChatRoomLogic.GetConnectionIdFromChatRoomConnectionPool(user.Id, chatRoomConnectionPool);
+            var updatedChatRoomConnectionPool = ChatRoomLogic.DecrementChatRoomConnectionPool(serverInstanceId, user.Id, chatRoomConnectionPool);
+
+            await _redis.SetKey(chatRoomId, updatedChatRoomConnectionPool, null);
+
+            return new Tuple<ChatRoomConnectionPool, string>(updatedChatRoomConnectionPool, removedConnectionId);
         }
         //
         // Summary:

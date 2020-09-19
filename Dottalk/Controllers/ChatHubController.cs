@@ -53,26 +53,24 @@ namespace Dottalk.Controllers
         //
         // Summary:
         //   Attempts to receive a request to leave room.
-        public async Task LeaveChatRoom(string chatRoomName)
+        public async Task LeaveChatRoom(string chatRoomName, string userName)
         {
-            var userConnectionId = Context.ConnectionId;
-            _logger.LogInformation("User with connection {userConnectionId:l} want leave room {chatRoomName:l}", userConnectionId, chatRoomName);
+            _logger.LogInformation("User {userName:l} want leave room {chatRoomName:l}", userName, chatRoomName);
 
             try
             {
-                _logger.LogInformation("Removing user connection from redis connection pool...");
-                await _chatRoomService.RemoveUserFromChatRoomConnectionPool(chatRoomName, userConnectionId);
+                var (updatedConnectionPool, connectionId) = await _chatRoomService.RemoveUserFromChatRoomConnectionPool(chatRoomName, userName);
+                _logger.LogInformation("Removed user from connection pool: {@updatedConnectionPool}", updatedConnectionPool);
+
+                _logger.LogInformation("Removing connection {connectionId:l} connection from in-memory connection pool.", connectionId);
+                await Groups.RemoveFromGroupAsync(connectionId, chatRoomName);
+
+                await base.OnDisconnectedAsync(null);
             }
-            catch (Exception e) when
-                (e is ObjectDoesNotExistException || e is ChatRoomIsFullException || e is UserIsAlreadyConnectedException)
+            catch (Exception e) when (e is ObjectDoesNotExistException || e is ChatRoomIsFullException || e is UserIsAlreadyConnectedException)
             {
                 throw new HubException(e.Message); // TODO: improve safety of the exception message with specific handler
             }
-
-            _logger.LogInformation("Removing user connection from in-memory connection pool.");
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatRoomName);
-
-            await base.OnDisconnectedAsync(null);
         }
         //
         // Summary:
