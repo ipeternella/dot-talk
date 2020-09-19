@@ -6,12 +6,36 @@ const RPC_JOIN_CHAT_ROOM = "JoinChatRoom";
 const RPC_LEAVE_CHAT_ROOM = "LeaveChatRoom";
 const RPC_SEND_MESSAGE_TO_CHAT_ROOM = "BroadcastMessageToChatRoom";
 
+// global variable -> only set when the user joins a room
+var userName = null;
+
 const connection = new signalR.HubConnectionBuilder()
     .withUrl(CHAT_HUB_ENDPOINT)
     .build();
 
-connection.on("Send", function (message) {
+function writeServerMessageForSomeTime(message, isError = false, durationInMs = 1500) {
+    let serverMessagesSection = document.getElementById("server-messages");
+    const clearServerMessage = () => serverMessagesSection.innerHTML = "";
+
+    serverMessagesSection.style.color = "LimeGreen";
+    if (isError) serverMessagesSection.style.color = "IndianRed";
+
+    serverMessagesSection.innerHTML = message;
+    setTimeout(() => clearServerMessage(), durationInMs);  // clears after some time
+}
+
+function extractHubExceptionMessage(rawException) {
+    const DEFAULT_EXCEPTION_MESSAGE = "Ops! Something went wrong in our servers... try again later!";
+    const HUB_EXCEPTION_PREFIX = "HubException: ";
+    let exceptionMessages = rawException.split(HUB_EXCEPTION_PREFIX);
+
+    if (exceptionMessages.length > 1) return exceptionMessages[1];
+    return DEFAULT_EXCEPTION_MESSAGE;
+}
+
+connection.on("ReceiveMessage", function (message) {
     var newChatMessageLi = document.createElement("li");
+
     newChatMessageLi.textContent = message;
     document.getElementById("chat-messages-list").appendChild(newChatMessageLi);
 });
@@ -20,23 +44,38 @@ document.getElementById("chat-message-submit").addEventListener("click", async (
     var chatRoomName = document.getElementById("chat-message-input").value;
     var chatMessage = document.getElementById("chat-message-input").value;
 
+    if (!userName) {
+        console.log("User name has not been set!");
+        return;
+    }
+
     try {
-        await connection.invoke(RPC_SEND_MESSAGE_TO_CHAT_ROOM, chatMessage, chatRoomName, "igp");
+        await connection.invoke(RPC_SEND_MESSAGE_TO_CHAT_ROOM, chatMessage, chatRoomName);
     }
     catch (e) {
-        console.error(e.toString());
+        let hubException = extractHubExceptionMessage(e.toString());
+        writeServerMessageForSomeTime(hubException, isError = true);
     }
+
     event.preventDefault();
 });
 
 document.getElementById("join-chat-room").addEventListener("click", async (event) => {
     var chatRoomName = document.getElementById("chat-room-name").value;
+    userName = document.getElementById("user-name").value;
+
+    if (!userName) {
+        console.log("User name has not been set!");
+        return;
+    }
 
     try {
-        await connection.invoke(RPC_JOIN_CHAT_ROOM, "igp", chatRoomName);
+        await connection.invoke(RPC_JOIN_CHAT_ROOM, userName, chatRoomName);
+        writeServerMessageForSomeTime(`Successfully connected to chat room ${chatRoomName}!`);
     }
     catch (e) {
-        console.error(e.toString());
+        let hubException = extractHubExceptionMessage(e.toString());
+        writeServerMessageForSomeTime(hubException, isError = true);
     }
 
     event.preventDefault();
@@ -44,12 +83,15 @@ document.getElementById("join-chat-room").addEventListener("click", async (event
 
 document.getElementById("leave-chat-room").addEventListener("click", async (event) => {
     var chatRoomName = document.getElementById("chat-room-name").value;
+    userName = null;
 
     try {
-        await connection.invoke(RPC_LEAVE_CHAT_ROOM, "igp", chatRoomName);
+        await connection.invoke(RPC_LEAVE_CHAT_ROOM, chatRoomName);
+        writeServerMessageForSomeTime(`Successfully left the chat room ${chatRoomName}`);
     }
     catch (e) {
-        console.error(e.toString());
+        let hubException = extractHubExceptionMessage(e.toString());
+        writeServerMessageForSomeTime(hubException, isError = true);
     }
 
     event.preventDefault();

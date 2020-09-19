@@ -117,7 +117,14 @@ li {
 }
 
 #user-and-chat-name-area {
-  padding: 0 0 20px 0;
+  margin: 20px auto;
+  padding: 0 0 0 0;
+}
+
+#server-messages {
+  font-weight: bold;
+  height: 30px;
+  color: green;
 }
 
 #chat-log {
