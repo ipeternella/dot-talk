@@ -70,7 +70,7 @@ namespace Dottalk.Controllers
                 _logger.LogInformation("Removed user with id {connectionId} connection pool: {updatedConnectionPool}",
                     connectionId, updatedConnectionPool);
             }
-            catch (Exception e) when (e is ObjectDoesNotExistException || e is ChatRoomIsFullException)
+            catch (ObjectDoesNotExistException e)
             {
                 throw new HubException(e.Message); // TODO: improve safety of the exception message with specific handler
             }
@@ -113,7 +113,7 @@ namespace Dottalk.Controllers
                 var processedChatMessage = await _chatRoomService.ProcessUserMessage(userName, chatRoomName, message);
                 await Clients.Group(chatRoomName).SendAsync("ReceiveMessage", processedChatMessage);
             }
-            catch (Exception e) when (e is ObjectDoesNotExistException)
+            catch (ObjectDoesNotExistException e)
             {
                 throw new HubException(e.Message); // TODO: improve safety of the exception message with specific handler
             }

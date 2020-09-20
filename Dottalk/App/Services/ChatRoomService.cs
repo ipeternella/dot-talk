@@ -58,6 +58,9 @@ namespace Dottalk.App.Services
         // Summary: 
         //   Gets all the users connected to a given chat room across all application instances hosting such room.
         //   If the room is not found, it raises an exception.
+        //
+        // Raises:
+        //   ObjectDoesNotExistException - if the chat room was not found.
         public async Task<ChatRoomConnectionPool> GetChatRoomConnectionPool(string chatRoomName)
         {
             _logger.LogInformation("Getting connection store for chat room name: {chatRoomName:l}", chatRoomName);
@@ -112,9 +115,7 @@ namespace Dottalk.App.Services
         //   ChatRoomConnectionPool - an updated chat room connection pool without the user connection.
         //
         // Raises:
-        //   ChatRoomIsFullException - the chat is full (risen by the chat room domain logic)
-        //   ObjectDoesNotExistException - the chat room or the user were not found
-        //   UserIsAlreadyConnectedException - the user is attempting to connect to a chat room in which he's already connected
+        //   ObjectDoesNotExistException - the chat room or the user was not found.
         public async Task<Tuple<ChatRoomConnectionPool, string>> RemoveConnectionFromChatRoomConnectionPool(string chatRoomName, string connectionId)
         {
             var chatRoomConnectionPool = await GetChatRoomConnectionPool(chatRoomName);
@@ -134,9 +135,7 @@ namespace Dottalk.App.Services
         //   ChatRoomConnectionPool - an updated chat room connection pool without the user connection.
         //
         // Raises:
-        //   ChatRoomIsFullException - the chat is full (risen by the chat room domain logic)
-        //   ObjectDoesNotExistException - the chat room or the user were not found
-        //   UserIsAlreadyConnectedException - the user is attempting to connect to a chat room in which he's already connected
+        //   ObjectDoesNotExistException - the chat room or the user was not found.
         public async Task<Tuple<ChatRoomConnectionPool, string>> RemoveUserFromChatRoomConnectionPool(string chatRoomName, string userName)
         {
             var chatRoomConnectionPool = await GetChatRoomConnectionPool(chatRoomName);
@@ -156,7 +155,7 @@ namespace Dottalk.App.Services
         //   Processes messages sent by users.
         //
         // Raises:
-        //   ObjectDoesNotExistException - if the chat room or user are not found!
+        //   ObjectDoesNotExistException - if the chat room or user is not found
         public async Task<string> ProcessUserMessage(string userName, string chatRoomName, string rawMessage)
         {
             var chatRoomConnectionPool = await GetChatRoomConnectionPool(chatRoomName);
