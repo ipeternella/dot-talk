@@ -100,6 +100,18 @@ namespace Dottalk.App.Domain.Models
             chatRoomConnectionPool.TotalActiveConnections += 1;
             return chatRoomConnectionPool;
         }
+        public static bool IsUserOnChatRoomConnectionPool(Guid userId, ChatRoomConnectionPool chatRoomConnection)
+        {
+            foreach (var server in chatRoomConnection.ServerInstances)
+            {
+                var connectedUser = server.ConnectedUsers.Where(conn => conn.UserId == userId).FirstOrDefault();
+
+                if (connectedUser != null) return true;
+            }
+
+            return false;
+        }
+
 
         public static string GetConnectionIdFromChatRoomConnectionPool(Guid userId, ChatRoomConnectionPool chatRoomConnection)
         {

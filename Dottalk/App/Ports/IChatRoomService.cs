@@ -20,5 +20,6 @@ namespace Dottalk.App.Ports
         Task<ChatRoomConnectionPool> AddUserToChatRoomConnectionPool(string chatRoomName, string userName, string connectionId);
         Task<Tuple<ChatRoomConnectionPool, string>> RemoveConnectionFromChatRoomConnectionPool(string chatRoomName, string connectionId);
         Task<Tuple<ChatRoomConnectionPool, string>> RemoveUserFromChatRoomConnectionPool(string chatRoomName, string connectionId);
+        Task<string> ProcessUserMessage(string userName, string chatRoomName, string rawMessage);
     }
 }

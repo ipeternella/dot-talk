@@ -36,19 +36,20 @@ namespace Dottalk.Controllers
             {
                 _logger.LogInformation("Fetching chat room connection pool to see if it's full...");
                 await _chatRoomService.AddUserToChatRoomConnectionPool(chatRoomName, userName, userConnectionId);
+
+                _logger.LogInformation("Adding user to chat room group...");
+                await Groups.AddToGroupAsync(Context.ConnectionId, chatRoomName);
+
+                _logger.LogInformation("Broadcasting new user in room message...");
+                await base.OnConnectedAsync();
+
+                await BroadcastSystemMessageToChatRoom($"A new user has joined the room: {userName}", chatRoomName);
             }
             catch (Exception e) when
                 (e is ObjectDoesNotExistException || e is ChatRoomIsFullException || e is UserIsAlreadyConnectedException)
             {
                 throw new HubException(e.Message); // TODO: improve safety of the exception message with specific handler
             }
-
-            _logger.LogInformation("Adding user to chat room group...");
-            await Groups.AddToGroupAsync(Context.ConnectionId, chatRoomName);
-
-            _logger.LogInformation("Broadcasting new user in room message...");
-            await BroadcastMessageToChatRoom(chatRoomName, $"A new user has joined the room: {userName}");
-            await base.OnConnectedAsync();
         }
         //
         // Summary:
@@ -63,9 +64,10 @@ namespace Dottalk.Controllers
                 _logger.LogInformation("Removed user from connection pool: {@updatedConnectionPool}", updatedConnectionPool);
 
                 _logger.LogInformation("Removing connection {connectionId:l} connection from in-memory connection pool.", connectionId);
-                await Groups.RemoveFromGroupAsync(connectionId, chatRoomName);
-
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatRoomName);
                 await base.OnDisconnectedAsync(null);
+
+                await BroadcastSystemMessageToChatRoom($"User {userName} has left the room...", chatRoomName);
             }
             catch (Exception e) when (e is ObjectDoesNotExistException || e is ChatRoomIsFullException || e is UserIsAlreadyConnectedException)
             {
@@ -84,10 +86,27 @@ namespace Dottalk.Controllers
         }
         //
         // Summary:
-        //   Broadcasts a message to the whole chat room.
-        public async Task BroadcastMessageToChatRoom(string message, string chatRoomName)
+        //   Broadcasts a message to the whole chat room (system messages).
+        public async Task BroadcastSystemMessageToChatRoom(string message, string chatRoomName)
         {
-            await Clients.Group(chatRoomName).SendAsync("ReceiveMessage", message);
+            var chatMessage = message;
+
+            await Clients.Group(chatRoomName).SendAsync("ReceiveMessage", chatMessage);
+        }
+        //
+        // Summary:
+        //   Broadcasts a message that came from a user to the whole chat room.
+        public async Task BroadcastUserMessageToChatRoom(string message, string chatRoomName, string userName)
+        {
+            try
+            {
+                var processedChatMessage = await _chatRoomService.ProcessUserMessage(userName, chatRoomName, message);
+                await Clients.Group(chatRoomName).SendAsync("ReceiveMessage", processedChatMessage);
+            }
+            catch (Exception e) when (e is ObjectDoesNotExistException)
+            {
+                throw new HubException(e.Message); // TODO: improve safety of the exception message with specific handler
+            }
         }
     }
 }

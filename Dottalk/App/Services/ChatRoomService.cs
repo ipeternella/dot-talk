@@ -153,6 +153,23 @@ namespace Dottalk.App.Services
         }
         //
         // Summary:
+        //   Processes messages sent by users.
+        //
+        // Raises:
+        //   ObjectDoesNotExistException - if the chat room or user are not found!
+        public async Task<string> ProcessUserMessage(string userName, string chatRoomName, string rawMessage)
+        {
+            var chatRoomConnectionPool = await GetChatRoomConnectionPool(chatRoomName);
+            var user = await _userService.GetUser(userName);
+
+            if (!ChatRoomLogic.IsUserOnChatRoomConnectionPool(user.Id, chatRoomConnectionPool))
+                throw new ObjectDoesNotExistException("User is not in the room!");
+
+            // TODO: check if it's a command and process it
+            return $"{userName}: {rawMessage}";
+        }
+        //
+        // Summary:
         //   Gets all chat rooms given the pagination params.
         public async Task<IEnumerable<ChatRoomResponseDTO>> GetAllChatRooms(PaginationParams? paginationParams)
         {
