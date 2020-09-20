@@ -47,9 +47,10 @@ namespace Dottalk.Controllers
             _logger.LogInformation("Adding user to chat room group...");
             await Groups.AddToGroupAsync(Context.ConnectionId, chatRoomName);
 
-            _logger.LogInformation("Broadcasting new user in room message...");
+            _logger.LogInformation("Adding connection...");
             await base.OnConnectedAsync();
 
+            _logger.LogInformation("Broadcasting new user message to the room...");
             await BroadcastSystemMessageToChatRoom($"A new user has joined the room: {userName}", chatRoomName);
         }
         //
@@ -57,22 +58,30 @@ namespace Dottalk.Controllers
         //   Attempts to receive a request to leave room.
         public async Task LeaveChatRoom(string chatRoomName, string userName)
         {
-            _logger.LogInformation("User {userName:l} want leave room {chatRoomName:l}", userName, chatRoomName);
+            ChatRoomConnectionPool updatedConnectionPool;
+            string connectionId;
 
             try
             {
-                var (updatedConnectionPool, connectionId) = await _chatRoomService.RemoveUserFromChatRoomConnectionPool(chatRoomName, userName);
-                _logger.LogInformation("Removed user from connection pool: {@updatedConnectionPool}", updatedConnectionPool);
+                _logger.LogInformation("User {userName:l} want leave room {chatRoomName:l}", userName, chatRoomName);
+                (updatedConnectionPool, connectionId) = await _chatRoomService
+                    .RemoveUserFromChatRoomConnectionPool(chatRoomName, userName);
 
-                _logger.LogInformation("Removing connection {connectionId:l} connection from in-memory connection pool.", connectionId);
-                await Groups.RemoveFromGroupAsync(connectionId, chatRoomName);
+                _logger.LogInformation("Removed user with id {connectionId} connection pool: {updatedConnectionPool}",
+                    connectionId, updatedConnectionPool);
             }
-            catch (Exception e) when (e is ObjectDoesNotExistException || e is ChatRoomIsFullException || e is UserIsAlreadyConnectedException)
+            catch (Exception e) when (e is ObjectDoesNotExistException || e is ChatRoomIsFullException)
             {
                 throw new HubException(e.Message); // TODO: improve safety of the exception message with specific handler
             }
 
+            _logger.LogInformation("Removing user from group...");
+            await Groups.RemoveFromGroupAsync(connectionId, chatRoomName);
+
+            _logger.LogInformation("Removing connection...");
             await base.OnDisconnectedAsync(null);
+
+            _logger.LogInformation("Broadcasting user has left message to the room...");
             await BroadcastSystemMessageToChatRoom($"User {userName} has left the room...", chatRoomName);
         }
         //
