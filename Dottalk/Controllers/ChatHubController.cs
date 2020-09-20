@@ -27,7 +27,7 @@ namespace Dottalk.Controllers
         //
         // Summary:
         //   Attempts to accept a new connection for a given chat room. Can fail if the room is full, for example.
-        public async Task JoinChatRoom(string userName, string chatRoomName)
+        public async Task JoinChatRoom(string chatRoomName, string userName)
         {
             var userConnectionId = Context.ConnectionId;
             _logger.LogInformation("A new user {userName:l} want to join room {chatRoomName:l} with connection id: {userConnectionId:l}",

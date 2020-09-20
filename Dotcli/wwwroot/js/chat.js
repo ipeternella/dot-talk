@@ -70,7 +70,7 @@ document.getElementById("join-chat-room").addEventListener("click", async (event
     }
 
     try {
-        await connection.invoke(RPC_JOIN_CHAT_ROOM, userName, chatRoomName);
+        await connection.invoke(RPC_JOIN_CHAT_ROOM, chatRoomName, userName);
         writeServerMessageForSomeTime(`Successfully connected to chat room ${chatRoomName}!`);
     }
     catch (e) {
