@@ -4,7 +4,7 @@
 const CHAT_HUB_ENDPOINT = "http://localhost:8080/chathub";
 const RPC_JOIN_CHAT_ROOM = "JoinChatRoom";
 const RPC_LEAVE_CHAT_ROOM = "LeaveChatRoom";
-const RPC_SEND_MESSAGE_TO_CHAT_ROOM = "BroadcastMessageToChatRoom";
+const RPC_SEND_MESSAGE_TO_CHAT_ROOM = "BroadcastUserMessageToChatRoom";
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl(CHAT_HUB_ENDPOINT)
@@ -38,16 +38,19 @@ connection.on("ReceiveMessage", function (message) {
 });
 
 document.getElementById("chat-message-submit").addEventListener("click", async (event) => {
-    var chatRoomName = document.getElementById("chat-message-input").value;
-    var chatMessage = document.getElementById("chat-message-input").value;
+    let chatRoomName = document.getElementById("chat-room-name").value;
+    let chatMessage = document.getElementById("chat-message-input").value;
+    let userName = document.getElementById("user-name").value;
 
     if (!userName) {
-        console.log("User name has not been set!");
+        writeServerMessageForSomeTime("User name has not been set!", isError = true);
         return;
     }
 
     try {
-        await connection.invoke(RPC_SEND_MESSAGE_TO_CHAT_ROOM, chatMessage, chatRoomName);
+        await connection.invoke(RPC_SEND_MESSAGE_TO_CHAT_ROOM, chatMessage, chatRoomName, userName);
+        var chatMessageInput = document.getElementById("chat-message-input");
+        chatMessageInput.value = "";
     }
     catch (e) {
         let hubException = extractHubExceptionMessage(e.toString());
@@ -58,11 +61,11 @@ document.getElementById("chat-message-submit").addEventListener("click", async (
 });
 
 document.getElementById("join-chat-room").addEventListener("click", async (event) => {
-    var chatRoomName = document.getElementById("chat-room-name").value;
-    userName = document.getElementById("user-name").value;
+    let chatRoomName = document.getElementById("chat-room-name").value;
+    let userName = document.getElementById("user-name").value;
 
     if (!userName) {
-        console.log("User name has not been set!");
+        writeServerMessageForSomeTime("User name has not been set!", isError = true);
         return;
     }
 
@@ -79,8 +82,8 @@ document.getElementById("join-chat-room").addEventListener("click", async (event
 });
 
 document.getElementById("leave-chat-room").addEventListener("click", async (event) => {
-    var chatRoomName = document.getElementById("chat-room-name").value;
-    userName = document.getElementById("user-name").value;
+    let chatRoomName = document.getElementById("chat-room-name").value;
+    let userName = document.getElementById("user-name").value;
 
     try {
         await connection.invoke(RPC_LEAVE_CHAT_ROOM, chatRoomName, userName);
@@ -101,6 +104,7 @@ document.getElementById("leave-chat-room").addEventListener("click", async (even
         await connection.start();
     }
     catch (e) {
-        console.error(e.toString());
+        let hubException = extractHubExceptionMessage(e.toString());
+        writeServerMessageForSomeTime(hubException, isError = true);
     }
 })();
